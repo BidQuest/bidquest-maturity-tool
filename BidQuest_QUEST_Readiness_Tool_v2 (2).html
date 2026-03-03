@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BidQuest — QUEST Bid Readiness Assessment</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Source+Sans+3:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --emerald:     #094134;
+  --emerald-dk:  #052b22;
+  --emerald-md:  #0d5444;
+  --gold:        #CFAE6D;
+  --gold-lt:     #e2c98a;
+  --gold-pale:   rgba(207,174,109,0.12);
+  --pearl:       #FAFAF7;
+  --pearl-dim:   rgba(250,250,247,0.65);
+  --pearl-faint: rgba(250,250,247,0.35);
+  --border:      rgba(207,174,109,0.22);
+  --border-hov:  rgba(207,174,109,0.5);
+  --red:   #c0392b; --red-bg:   rgba(192,57,43,0.13);
+  --amber: #c97d10; --amber-bg: rgba(201,125,16,0.13);
+  --ctrl:  #1a6e8a; --ctrl-bg:  rgba(26,110,138,0.13);
+  --green: #1a7a4a; --green-bg: rgba(26,122,74,0.11);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'Source Sans 3','Source Sans Pro',sans-serif;background:var(--emerald);color:var(--pearl);min-height:100vh;font-size:16px;line-height:1.6;}
+
+/* ── HEADER ── */
+header{background:linear-gradient(160deg,var(--emerald-dk) 0%,var(--emerald) 55%,#0a4a3a 100%);border-bottom:2px solid var(--gold);padding:2.5rem 1.5rem 2rem;text-align:center;position:relative;overflow:hidden;}
+header::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(207,174,109,0.1) 0%,transparent 70%);pointer-events:none;}
+.logo-wrap{display:inline-block;margin-bottom:1.25rem;}
+.logo-wrap img{height:88px;width:auto;display:block;}
+header h1{font-family:'Poppins',sans-serif;font-size:clamp(1.55rem,4.2vw,2.5rem);font-weight:700;color:var(--pearl);line-height:1.15;margin-bottom:0.5rem;letter-spacing:-0.01em;}
+header h1 span{color:var(--gold);}
+.hdr-sub{font-size:0.97rem;font-weight:300;color:var(--pearl-dim);max-width:540px;margin:0 auto 1.5rem;line-height:1.65;}
+.quest-strip{display:flex;justify-content:center;gap:0.4rem;flex-wrap:wrap;}
+.qpill{display:flex;align-items:center;gap:0.4rem;background:rgba(207,174,109,0.09);border:1px solid var(--border);border-radius:999px;padding:0.28rem 0.85rem 0.28rem 0.6rem;font-size:0.8rem;color:var(--pearl-dim);}
+.qpill b{font-family:'Poppins',sans-serif;font-size:0.95rem;font-weight:700;color:var(--gold);}
+
+/* ── PROGRESS ── */
+.prog-wrap{max-width:880px;margin:1.5rem auto 0;padding:0 1.5rem;display:flex;align-items:center;gap:0.85rem;}
+.prog-wrap span{font-size:0.76rem;color:var(--pearl-faint);white-space:nowrap;font-family:'Poppins',sans-serif;letter-spacing:0.04em;}
+.prog-track{flex:1;height:3px;background:rgba(207,174,109,0.12);border-radius:99px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-lt));border-radius:99px;transition:width 0.3s ease;width:0%;}
+
+/* ── LAYOUT ── */
+.wrap{max-width:880px;margin:0 auto;padding:1.75rem 1.5rem 0;}
+
+/* ── CARDS ── */
+.card{background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:14px;padding:1.75rem;margin-bottom:1.4rem;transition:border-color 0.2s;}
+.card:hover{border-color:var(--border-hov);}
+.card-title{font-family:'Poppins',sans-serif;font-size:1rem;font-weight:600;color:var(--gold);margin-bottom:1.1rem;display:flex;align-items:center;gap:0.5rem;letter-spacing:0.01em;}
+
+/* ── FORM ── */
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+@media(max-width:560px){.fgrid{grid-template-columns:1fr;}}
+.field label{display:block;font-size:0.72rem;font-weight:600;letter-spacing:0.09em;text-transform:uppercase;color:rgba(207,174,109,0.65);margin-bottom:0.38rem;font-family:'Poppins',sans-serif;}
+.field input,.field select{width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(207,174,109,0.18);border-radius:7px;padding:0.62rem 0.88rem;color:var(--pearl);font-family:'Source Sans 3','Source Sans Pro',sans-serif;font-size:0.93rem;outline:none;transition:border-color 0.2s,background 0.2s;-webkit-appearance:none;}
+.field input::placeholder{color:rgba(250,250,247,0.25);}
+.field input:focus,.field select:focus{border-color:var(--gold);background:rgba(255,255,255,0.09);}
+.field select option{background:#094134;color:#FAFAF7;}
+.field.full{grid-column:1/-1;}
+.field .hint{font-size:0.74rem;color:var(--pearl-faint);margin-top:0.3rem;font-style:italic;}
+
+/* ── DISCIPLINE ── */
+.disc{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:14px;margin-bottom:1.2rem;overflow:hidden;transition:border-color 0.2s;}
+.disc:hover{border-color:var(--border-hov);}
+.disc-head{display:flex;align-items:center;gap:1rem;padding:1.15rem 1.5rem;cursor:pointer;user-select:none;transition:background 0.18s;}
+.disc-head:hover{background:rgba(207,174,109,0.04);}
+.disc-icon{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Poppins',sans-serif;font-size:1.4rem;font-weight:800;flex-shrink:0;border:2px solid rgba(207,174,109,0.28);background:rgba(207,174,109,0.09);color:var(--gold);}
+.disc-meta{flex:1;min-width:0;}
+.disc-meta h3{font-family:'Poppins',sans-serif;font-size:0.97rem;font-weight:600;color:var(--pearl);margin-bottom:0.08rem;}
+.disc-meta p{font-size:0.81rem;color:var(--pearl-dim);font-weight:300;line-height:1.45;}
+.disc-prog-lbl{font-size:0.65rem;letter-spacing:0.07em;text-transform:uppercase;color:rgba(207,174,109,0.45);margin:0.38rem 0 0.28rem;font-family:'Poppins',sans-serif;}
+.disc-prog-track{height:3px;background:rgba(207,174,109,0.1);border-radius:99px;overflow:hidden;}
+.disc-prog-fill{height:100%;background:var(--gold);border-radius:99px;width:0%;transition:width 0.3s;}
+.disc-badge{font-family:'Poppins',sans-serif;font-size:1.3rem;font-weight:700;color:rgba(207,174,109,0.18);min-width:50px;text-align:right;flex-shrink:0;transition:color 0.3s;}
+.disc-badge.live{color:var(--gold);}
+.disc-chev{width:18px;height:18px;color:rgba(207,174,109,0.35);flex-shrink:0;transition:transform 0.3s;}
+.disc.open .disc-chev{transform:rotate(180deg);}
+.disc-divider{height:1px;background:rgba(207,174,109,0.1);margin:0 1.5rem;display:none;}
+.disc.open .disc-divider{display:block;}
+.disc-body{display:none;padding:1.4rem 1.5rem;}
+.disc.open .disc-body{display:block;}
+
+/* ── QUESTIONS ── */
+.qblock{margin-bottom:1.4rem;padding-bottom:1.4rem;border-bottom:1px solid rgba(255,255,255,0.05);}
+.qblock:last-child{margin-bottom:0;padding-bottom:0;border-bottom:none;}
+.qlabel{display:inline-flex;align-items:center;background:rgba(207,174,109,0.11);color:var(--gold);font-size:0.65rem;font-weight:700;padding:0.13rem 0.48rem;border-radius:4px;margin-bottom:0.5rem;font-family:'Poppins',sans-serif;letter-spacing:0.07em;text-transform:uppercase;}
+.qtext{font-size:0.93rem;color:var(--pearl);margin-bottom:0.8rem;line-height:1.55;}
+.opts{display:flex;flex-direction:column;gap:0.4rem;}
+.opt{display:flex;align-items:flex-start;gap:0.7rem;padding:0.7rem 0.95rem;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:8px;cursor:pointer;text-align:left;color:rgba(250,250,247,0.72);font-family:'Source Sans 3','Source Sans Pro',sans-serif;font-size:0.855rem;line-height:1.5;transition:all 0.16s;}
+.opt:hover{background:rgba(207,174,109,0.07);border-color:rgba(207,174,109,0.28);color:var(--pearl);}
+.opt.chosen{background:rgba(207,174,109,0.13);border-color:var(--gold);color:var(--pearl);}
+.opt-n{min-width:21px;height:21px;border-radius:50%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.13);display:flex;align-items:center;justify-content:center;font-size:0.67rem;font-weight:700;color:rgba(250,250,247,0.35);flex-shrink:0;margin-top:1px;transition:all 0.16s;font-family:'Poppins',sans-serif;}
+.opt.chosen .opt-n{background:var(--gold);border-color:var(--gold);color:var(--emerald);}
+
+/* ── SUBMIT ── */
+.submit-area{max-width:880px;margin:0.5rem auto 2.5rem;padding:0 1.5rem;text-align:center;}
+.btn-submit{background:var(--gold);color:var(--emerald);padding:1rem 3rem;font-size:1rem;font-weight:700;border:none;border-radius:8px;cursor:pointer;font-family:'Poppins',sans-serif;letter-spacing:0.04em;transition:all 0.2s;box-shadow:0 4px 24px rgba(207,174,109,0.2);}
+.btn-submit:hover{background:var(--gold-lt);transform:translateY(-2px);box-shadow:0 8px 32px rgba(207,174,109,0.3);}
+.btn-submit:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
+.submit-hint{font-size:0.78rem;color:var(--pearl-faint);margin-top:0.55rem;}
+
+/* ── RESULTS ── */
+#results{display:none;max-width:880px;margin:0 auto 3rem;padding:0 1.5rem;}
+.res-card{background:linear-gradient(150deg,rgba(9,65,52,0.97) 0%,rgba(5,43,34,0.99) 100%);border:2px solid var(--gold);border-radius:16px;padding:2rem;position:relative;overflow:hidden;}
+.res-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:0.5;}
+.res-hdr{text-align:center;margin-bottom:1.5rem;padding-bottom:1.5rem;border-bottom:1px solid rgba(207,174,109,0.18);}
+.res-hdr img{height:54px;width:auto;margin-bottom:0.7rem;}
+.res-hdr h2{font-family:'Poppins',sans-serif;font-size:1.45rem;font-weight:700;color:var(--gold);margin-bottom:0.2rem;}
+.res-meta{font-size:0.82rem;color:var(--pearl-faint);font-family:'Source Sans 3',sans-serif;}
+
+/* overall maturity */
+.mat-block{border-radius:12px;padding:1.5rem;text-align:center;margin-bottom:1.4rem;border:1px solid transparent;}
+.mat-block.reactive   {background:var(--red-bg);  border-color:rgba(192,57,43,0.35);}
+.mat-block.structured {background:var(--amber-bg);border-color:rgba(201,125,16,0.35);}
+.mat-block.controlled {background:var(--ctrl-bg); border-color:rgba(26,110,138,0.35);}
+.mat-block.strategic  {background:var(--green-bg);border-color:rgba(26,122,74,0.3);}
+.mat-lbl{font-size:0.7rem;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;font-family:'Poppins',sans-serif;opacity:0.6;margin-bottom:0.3rem;}
+.mat-title{font-family:'Poppins',sans-serif;font-size:1.85rem;font-weight:800;margin-bottom:0.2rem;letter-spacing:-0.01em;}
+.mat-block.reactive   .mat-title{color:#e05a4a;}
+.mat-block.structured .mat-title{color:#e8a030;}
+.mat-block.controlled .mat-title{color:#3baac4;}
+.mat-block.strategic  .mat-title{color:#2dbe70;}
+.mat-score{font-size:0.9rem;opacity:0.65;margin-bottom:0.7rem;font-family:'Source Sans 3',sans-serif;}
+.mat-desc{font-size:0.87rem;line-height:1.65;opacity:0.78;max-width:500px;margin:0 auto;font-family:'Source Sans 3',sans-serif;}
+
+/* per-discipline grid */
+.disc-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.2rem;}
+@media(max-width:540px){.disc-grid{grid-template-columns:1fr;}}
+.drc{padding:1rem 1.1rem;border-radius:10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);}
+.drc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem;}
+.drc-name{display:flex;align-items:center;gap:0.45rem;font-family:'Poppins',sans-serif;font-weight:600;font-size:0.86rem;color:var(--pearl);}
+.drc-icon{width:25px;height:25px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Poppins',sans-serif;font-size:0.82rem;font-weight:800;background:rgba(207,174,109,0.1);color:var(--gold);border:1px solid rgba(207,174,109,0.22);}
+.drc-right{display:flex;align-items:center;gap:0.4rem;}
+.rdot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.rdot.reactive  {background:var(--red);}
+.rdot.structured{background:var(--amber);}
+.rdot.controlled{background:var(--ctrl);}
+.rdot.strategic {background:var(--green);}
+.drc-pct{font-family:'Poppins',sans-serif;font-size:1.2rem;font-weight:700;}
+.drc-pct.reactive  {color:#e05a4a;}
+.drc-pct.structured{color:#e8a030;}
+.drc-pct.controlled{color:#3baac4;}
+.drc-pct.strategic {color:#2dbe70;}
+.drc-bar-track{height:4px;background:rgba(255,255,255,0.07);border-radius:99px;overflow:hidden;margin-bottom:0.5rem;}
+.drc-bar{height:100%;border-radius:99px;transition:width 0.5s ease;}
+.drc-bar.reactive  {background:var(--red);}
+.drc-bar.structured{background:var(--amber);}
+.drc-bar.controlled{background:var(--ctrl);}
+.drc-bar.strategic {background:var(--green);}
+.drc-rating{font-size:0.72rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;font-family:'Poppins',sans-serif;margin-bottom:0.4rem;}
+.drc-rating.reactive  {color:#e05a4a;}
+.drc-rating.structured{color:#e8a030;}
+.drc-rating.controlled{color:#3baac4;}
+.drc-rating.strategic {color:#2dbe70;}
+.drc-rec{font-size:0.76rem;color:var(--pearl-dim);line-height:1.5;font-family:'Source Sans 3',sans-serif;}
+
+/* priority note */
+.priority-note{background:rgba(207,174,109,0.08);border-left:3px solid var(--gold);border-radius:0 8px 8px 0;padding:0.85rem 1rem;font-size:0.84rem;color:rgba(250,250,247,0.72);line-height:1.55;margin-bottom:1.2rem;font-family:'Source Sans 3',sans-serif;}
+.priority-note strong{color:var(--gold);}
+
+/* actions */
+.res-actions{display:flex;gap:0.8rem;justify-content:center;flex-wrap:wrap;}
+.btn{padding:0.68rem 1.5rem;border-radius:7px;font-family:'Poppins',sans-serif;font-size:0.86rem;font-weight:600;cursor:pointer;border:none;transition:all 0.18s;letter-spacing:0.02em;}
+.btn-gold{background:var(--gold);color:var(--emerald);}
+.btn-gold:hover{background:var(--gold-lt);transform:translateY(-1px);}
+.btn-outline{background:transparent;color:var(--gold);border:1px solid var(--gold);}
+.btn-outline:hover{background:rgba(207,174,109,0.08);transform:translateY(-1px);}
+
+/* sending overlay */
+.sending-overlay{display:none;position:fixed;inset:0;background:rgba(5,43,34,0.92);z-index:999;align-items:center;justify-content:center;flex-direction:column;gap:1rem;}
+.sending-overlay.show{display:flex;}
+.spinner{width:40px;height:40px;border:3px solid rgba(207,174,109,0.2);border-top-color:var(--gold);border-radius:50%;animation:spin 0.8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.sending-overlay p{font-family:'Poppins',sans-serif;color:var(--gold);font-size:0.95rem;letter-spacing:0.04em;}
+
+/* toast */
+.toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(80px);background:var(--emerald-md);border:1px solid var(--gold);border-radius:8px;padding:0.8rem 1.4rem;font-family:'Poppins',sans-serif;font-size:0.88rem;color:var(--pearl);z-index:1000;transition:transform 0.35s ease;white-space:nowrap;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+.toast.error{border-color:var(--red);background:rgba(192,57,43,0.25);}
+
+footer{text-align:center;padding:1.5rem;font-size:0.74rem;color:rgba(250,250,247,0.22);border-top:1px solid rgba(207,174,109,0.1);font-family:'Source Sans 3',sans-serif;letter-spacing:0.03em;}
+footer strong{color:rgba(207,174,109,0.55);}
+
+@media print{
+  header,.prog-wrap,.wrap,.submit-area,footer,.res-actions{display:none!important;}
+  body{background:white;}
+  #results{display:block!important;padding:0;max-width:100%;}
+  .res-card{border:1px solid #ccc;background:white;color:#1a1a1a;}
+}
+</style>
+</head>
+<body>
+
+<!-- SENDING OVERLAY -->
+<div class="sending-overlay" id="sending-overlay">
+  <div class="spinner"></div>
+  <p>Sending your results…</p>
+</div>
+<div class="toast" id="toast"></div>
+
+<!-- HEADER -->
+<header>
+  <div class="logo-wrap"><img id="hdr-logo" src="" alt="BidQuest"></div>
+  <h1>QUEST Bid Readiness <span>Assessment</span></h1>
+  <p class="hdr-sub">Answer 25 questions across the five QUEST disciplines to receive your organisation's bid maturity rating from the QUEST Standard.</p>
+  <div class="quest-strip">
+    <div class="qpill"><b>Q</b> Qualify</div>
+    <div class="qpill"><b>U</b> Understand</div>
+    <div class="qpill"><b>E</b> Engineer</div>
+    <div class="qpill"><b>S</b> Substantiate</div>
+    <div class="qpill"><b>T</b> Test</div>
+  </div>
+</header>
+
+<!-- PROGRESS -->
+<div class="prog-wrap">
+  <span id="prog-label">0 of 25 answered</span>
+  <div class="prog-track"><div class="prog-fill" id="prog-fill"></div></div>
+</div>
+
+<!-- MAIN -->
+<div class="wrap">
+
+  <!-- Contact details -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Your Details
+    </div>
+    <div class="fgrid">
+      <div class="field"><label>Your Name *</label><input type="text" id="f-name" placeholder="e.g. Jane Smith" required></div>
+      <div class="field"><label>Company Name *</label><input type="text" id="f-company" placeholder="e.g. Acme Solutions Ltd" required></div>
+      <div class="field"><label>Email Address *</label><input type="email" id="f-email" placeholder="e.g. jane@acmesolutions.co.uk" required></div>
+      <div class="field"><label>Sector</label>
+        <select id="f-sector">
+          <option value="">— Select sector —</option>
+          <option>Construction &amp; Infrastructure</option>
+          <option>Professional Services</option>
+          <option>IT &amp; Technology</option>
+          <option>Health &amp; Social Care</option>
+          <option>Facilities Management</option>
+          <option>Education &amp; Training</option>
+          <option>Logistics &amp; Supply Chain</option>
+          <option>Creative &amp; Marketing</option>
+          <option>Engineering</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="field"><label>Approx. Annual Bid Volume</label>
+        <select id="f-vol">
+          <option value="">— Select —</option>
+          <option>1–5 bids per year</option>
+          <option>6–15 bids per year</option>
+          <option>16–30 bids per year</option>
+          <option>30+ bids per year</option>
+        </select>
+      </div>
+      <div class="field"><label>Bid Function</label>
+        <select id="f-func">
+          <option value="">— Select —</option>
+          <option>No dedicated bid resource</option>
+          <option>Part-time / shared responsibility</option>
+          <option>Dedicated bid writer(s)</option>
+          <option>Bid team / function</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Disciplines -->
+  <div id="disc-container"></div>
+</div>
+
+<div class="submit-area">
+  <button class="btn-submit" onclick="submitAssessment()">Get My Bid Maturity Rating</button>
+  <p class="submit-hint">Complete all 25 questions — your results will be displayed instantly and emailed to you.</p>
+</div>
+
+<!-- RESULTS -->
+<div id="results">
+  <div class="res-card">
+    <div class="res-hdr">
+      <img id="res-logo" src="" alt="BidQuest">
+      <h2>QUEST Bid Maturity Report</h2>
+      <div class="res-meta" id="res-meta"></div>
+    </div>
+    <div id="mat-block"></div>
+    <div class="disc-grid" id="disc-grid"></div>
+    <div class="priority-note" id="priority-note"></div>
+    <div class="res-actions">
+      <button class="btn btn-gold" onclick="window.print()">🖨&nbsp; Print / Save as PDF</button>
+      <button class="btn btn-outline" onclick="resetTool()">↺&nbsp; Start New Assessment</button>
+    </div>
+  </div>
+</div>
+
+<footer><strong>BidQuest</strong> — The QUEST Standard &nbsp;·&nbsp; © 2025 BidQuest. All rights reserved. &nbsp;·&nbsp; hello@bidquest.co.uk</footer>
+
+<script>
+// ─────────────────────────────────────────────
+// LOGO (injected by build script)
+// ─────────────────────────────────────────────
+const LOGO = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCAQ4BDgDASIAAhEBAxEB/8QAHAABAAIDAQEBAAAAAAAAAAAAAAcIBAUGAQMC/8QAVBABAAEDAgEGBgsMCAQGAwEAAAECAwQFBhEHEiExQVEIE2FxgbEiNlZ0kZKhssHR0hQWFyMyN0JSYnWUsxUkMzVTcnPCNENVgmODhJOi8CVE4VT/xAAbAQEAAwEBAQEAAAAAAAAAAAAABAUGAwECB//EADkRAQABAwIBBwkIAgMBAAAAAAABAgMEBRESITFBUWFxoQYTIjRSgcHR8BQVFjJCkbHhIzNTY3Lx/9oADAMBAAIRAxEAPwCvoDqygAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD7xj1TgVZf6NN2Lc+eYmfoeTOxEbvgA9AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB1ljDo/BTfzZo9nOrxRFXDriLX/APZcmlavB5ng8W7tduONWX46J8k3Jp4/IiZVzg4O2qITMO3x8fZTMopAS0MAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAT7mYU2/B6izNMVzGBTd83GuK+PwSgOOmVpsvA48l9/T7NPGatIqt0R5ZtTwVGq3OCbX/rf9l3o1rji7/52/dVgBbqQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB9sGnn5tiiY4xVcpj5VwPFR/R3iKeiPFcyPg4Km7Stxe3RpdqaedFeXaiY7/AGcLc/os7rtXpUR3tR5O0+jcnu+Km2TaqsZFyzV+VbqmmfRPB82z3Vjzi7l1LHmeM28q5HH/ALpaxoKZ4qYlma6eGqYAH0+QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHT8ldqb3KFotEU87hkxVMcO6Jn6Fp+xWzkJtVXOUjCrpp4xatXq6vJHMmPXMLJstrdW9+I7PjLYeT9O2PVPXPwhVblQx6cbf+sWqePD7omr4en6XNO45cbNNnlHz+bHCK6LdfpmiHDtDi1cViieyGXzKeHIrjtn+QBIRwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEn+DjYqr3jmZHD2NvCqpnz1V08PVKwCEvBpx5+7NYyuPseZbt8PTMptZDV6t8qfc3GiU7YdPbv/KvXhE2Yt75s3Ip4eNwqKpnvmKqo+iEapd8Ja3w1XR7vD8qxcp4+aqPrRE0OnVcWLRPYy+q08OXXHaAJyvAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAATp4NuPFOi6nk8emu/TTw81P/wDUtI18HexFvZN6/wBt3Lr+SIhJbFajVvk197faXTw4lEdiIfCWtTOlaPe5vGKb9ynj3caY+pBywnhE2qq9kWLkRxi3mUTM93GmqPphXtodIq3xYjqmWY1ynbLmeuIAFoqAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH7tW7l25Fu1RVXXVPCKaY4zIPwOs0Xk73dqsU1WdJuWbdUcYryJi3Hy9PyO00jkQy6opr1XW7Nrp6beNamvo/wA1XD1Il3Ox7X5q4/lNs6dk3vy0T/H8ofEmcrGwdL2loGDl4N/JvXruR4q5VdmOExzZnqiOjqRm62L9F+jjo5nHJxq8e55uvnWW5DLFNnk20+uOu9XduT/7lVP+2Hcub5MbFOPyf6HbojonDor9NXsp+WXRsVlVcV+ue2f5b7Dp4ceiOyP4cNy52ar3Jzm82OPMrt1z5oqhWpaflWsVX+T7WKKOuLE1fBMT9CrLRaJVvYmO1mPKCnbIpns+MvBKPJbye6Ruza1/OzMjKs5NOTVapqtzHCIimmeqY8sthqnIflU86rS9ds3OnooyLM08I/zU8fUl1ajj0VzRVO0wg0aVk124uUU7xPah4ddrXJzu7Soqqu6VXft0/p48xcj5On5HKXrVyzcqt3bdduumeE01U8Jj0JVu7Rcjeid0O5ZuWp2rpmO9+AHRzAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAZOnYOZqOZbw8HGu5GRcnhRbt08Zl5MxEby9iJmdoYzZ6DoOsa7kxj6Tp97KrmemaY9jT56p6I9KV9kcjlFPi8zdF3nTHCr7js1dHmqqj1R8KW9N0/C03FpxcDFs41mmOEUW6YpiFNlaxbt+ja5Z8F7h6Fcu+lenhjq6f6RFtjkVpiKL24dQmZ65sY3qmqfohJu39r6DoNuKNL0zHsT23Obzq589U9LczMRHT0OO3Lyk7V0Sa7dWdTmZFP/ACsb2fT3TPVHwqWu/lZk7bzPZC/oxsPBp4tojtnndiT0IJ13lr1W9NVGj6bj4tHHorvzNyvh5o4RHyuJ1TfG7NT4xl67lzTPXTbq8XT8FPCEm1o1+vlq2hEva9jUclETUlvwi6rVe0cWPGUzXTmUzzePT+TUgOH0yMjIyKudfv3Ls8ePGuqZ9Zh0xXl2aJjjFVdMT8LQYeN9mtcG+7NZ2V9rveciNluNr2acfbemY9EcKbeJapiPNRDZPjiU00YtqimOFNNERER2REPqxVU71TLf0Rw0xDU7yx5ytp6rj09deJciPiyqRK42oWfujAyLEf8AMtVUfDHBTq5TNFdVE9dM8JaHQqvRrjuZfyip9K3Pf8E/+DtctU7KyKZuURXOdX7Hj0/k0JNhTaxkX7ExNm9ctzE8eNFUx0t7pm992adwjE17Mppp6qa6+fT8FXGHuXpFd25Vcpq53mFrlFm1Tbronk6lrGq13bmh63amjVNMxsnurqo4Vx5qo6Y+FD2icterWebRq2m42XT212Zm3V8HTHqSBtzlP2prE026sz7gv1f8vK9jHHyVdSruYGVjzxbe+Fxb1LDyY4ZmO6XKbn5FbFcV3tv6hNqrrixk9NPmiqOn4YRRuLbmtbfyZsarp97Hnj0V8ONFXliqOiVt6Kqa6YqoqiqJjjExPRL5ZuHi5uPVj5mPav2ao4VUXKYqifRLvj6xet8lz0o8UbK0Oxd5bfoz4Kbic978j2JlTczNt3YxLs9P3Lcnjbmf2Z66fN0x5kM61pWoaNn14Op4l3Gv0ddNccOMd8T2x5YaHGzLWTHoTy9XSzOXgXsWf8kcnX0MIBKQwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEn8lvJjf1qbeq67buY+ndE2rXVXf8vkp9bjfyKLFHHXLvjY1zJr4LccrnNhbF1fdmRFVmmcbApq4XMqunjTHkpj9KVhdn7T0ba+HFjTcePGVRwuX6+m5c88/RHQ3GHjWMPFt4uLZos2bVMU0UURwimI7IYO5Nf0rb2n1Z2qZVNm3H5MddVc91MdssrlZ17Mq4aebqbLD06xg08dXP0zLZzMRHGZcDvXlS0HQZrxsOY1PNp6PF2q+FFM/tV/VxRZv3lN1jcVVzEwqq9P06rjHi6KvZ3I/amPVHR53BJ+Jo36r/AO3zVubr36Mf9/lDqN1773HuOa6MzNqs41X/AOvY40UcO6e2fS5cF9bt0W44aI2hnLl2u7VxVzvIA+3MbHbFqm9uPTbVUcaa8q3Ex5OdDXOi5NLUXt/aLbqp50Tl0TMebpc708NuqeyXWxTxXaY65haymIimIjqDsesC/SXkqgbhxZwtf1HDnrsZV218WqY+hb+VU+UvHnG3/rluZ48cy5c+NPO+le6FV/krp7Gc8oqd7dFXa50BpWUAAdFtfem4tuVUxp2fX4mmf7C77O38E9XoTLsrlZ0bWPF4urRTpeZPRxqq42ap8lXZ6fhV4EHJ0+zkc8bT1wsMTU7+NO1M7x1SubTVTXTFVMxNMxxiYnrarc23dI3HgziapiUXqeE8yvqronvpnsV72Jyia3tiqjHmuc3T4npx7lX5MfsT+j5upP8AtHdOkbnwIytMyONURxuWa+i5bnumPp6mcycK9h1cUc3XDVYmoWM6ngnn6p+uVAfKJyd6ntWurKszObpkz7G/TT02/JXHZ5+r1OIXMvW7d61Vau0U10VxNNVNUcYmJ64mEHcqnJfOBRd1nbluqvGiZqvYkRxm3HfR3x5Oxa4Gqxc2t3ufr61NqWjTa3uWOWOrqRIAvGeAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAASbyMbCq1vLo1zVbP8A+Ns1/irdUf29cf7Y7e/qcci/RYomut3xsevJuRbo55Z/I9yb/dvidwa9ZmMaJivGxq4/tO6qqP1e6O3zJypiKaYimIiIjhEQUxFNMU0xERHREQ4flS37jbUwvuXF5l/Vb1HG1bmei3E/p1eTujtZG7dvZ97k90dTb2rNjTbG883TPWyuUXfOnbSwubM0ZGoXI/E40VdP+aruj1q57l17U9w6nXn6pkVXblX5NPVTRHdTHZDD1HNytRzbuZm367+Rdq51ddc8ZmWO0uFgUYtO/PV1snqGpXMurbmp6vmAJ6tAAAAHZ8itqLvKRpcTHHmzcq83CipxiRPB8txXv/nTHHmYd2qPJ00x9KLmztj1z2Sl4FPFk247YWKevBh36GKy8tWPFjlG1KY/5vMufDTH1LNK6+EBYi1vybkT/a41uqfRxj6FxotW2RMdij1+nfGieqUdgNUxoAAAAzdF1XUNG1C3n6bk3MfItzxiqmevyTHbHklhDyYiqNpe01TTO8c6yvJnyg4W6seMTJ5mLqtuPZWuPsbsfrUfTHY7nhExw7FNsW/exci3kY92u1et1RVRXRPCaZ74lYXkl5QrW48enS9Trpt6tbp6J6oyIjtj9rvhmNR0zzW9y1+Xq6v6a7S9Xi9tavfm6J6/7c3yx8nEU03tw6DY4fp5WNRHw10x649KGlzZiKo4TETE96CuWvYMadcr3FouNMYdU8cq1RHRaqn9OI/Vnt7kjS9R32s3Z7p+CLrGlcO9+zHfHxRMA0DNAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPriY97LyrWLj0TcvXa4oopjrmZnhEPJnYiN+SHR8m21L269w0Ys86jDtcK8q5H6NPdHlnqWg0/Ex8DCs4eJaptWLNEUUUU9URDRcnW2Mfau3LODRTTOTX+MybnbXXP0R1Q22uaph6NpWRqWdc8XYsUTVVPbPkjyz1MhqGXVlXeGnmjmbnTMKnDs8Vf5p5Z7Oxo+Und+LtLRKr9XNuZt6JpxrPHpqq/WnyQrHqedlaln3s7NvV3si9XNdddU8ZmWx3nuLM3Pr17VMv2PO9jatxPGLdEdVMNK0Gn4UY1HL+aef5MzqeoTl3OT8sc3zAFgrAAAAAABK3g224q3LqV2aeM0YkRE93GuPqRSmnwZ7ceL1u7zennWaYn48/UganVw4tf10rLSKeLMo9/wDCZXrx6xjeCA/CPx4t7nwMiJ/tcXhMeaqfrT2hXwmLERe0XJ/Sqpu0T6Jpn6VlpNW2VT7/AOFTrdO+HVPVt/KGwGwYcAAAAAAfbCycjCy7WXi3a7N+1VFVFdM8JpmO18R5Mb8kkTMTvCznJXvSzuzR+bfmijU8emIyLcdHOjsriO6fkl1+RZt5Fi5YvUU3Ldymaa6ao4xMTHCYVI2treZt7W8fVcKuYuWqvZU8eEV09tM+SVqdtazha/o2PqmBc59m9Tx4dtFXbTPliehk9Twvs9fHR+WfBtdJ1D7Vb4K/zR4x1/NXXlW2dc2prszYpmrTcmZqx6/1e+ifLHyxwcYtnvbb2Lubb+RpeTEU1VRzrNzh02646qvr8nFVbVcHJ0zUb+BmW5t37Fc0V0z3wutMzPtFvhq/NH1uoNXwPst3ip/LPh2MUBZqkAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAS34PW2IytQu7kyrXOt40zbxuMdE3Jjpq9ETw9KLdLwr+o6jj4GNTzr1+5TbojyzPBbPbGj4+g6FiaVi0xFGPbimZ/Wq/Sq9M8ZVGr5XmrXm456v4Xeh4nnr3nKuan+WyQFy87tq1LVo2/h3P6nh1cb00z/aXe7zU+vilblO3JG2NqZGbbqiMu5HisaJ/XmOv0dfoVauV13LlVy5VNVdUzNVUzxmZntQtGxOKqb1XRzLDXs3hpixTzzz9z8gNIyj9W66rddNdPCKqZ4xxji6+3tyzufSbuqbdiinPsU87M0ynoq/z2o7aZ/V7J6O5xzO0LVc3RdUs6jp96bV+zVxieyY7YnviXK7TVMb0TtMfXK7Wa6Ina5G8T+/fDDroqormiumaaqZ4TExwmJflOWRom3eVPQ6tX0zmadrduI8fTHTHP7q47Ynsqjp9SIdyaDqm3tRqwdVxa7Nzrpnrprjvpnthxx8um9M0TyVRzw75OFXYiK45aJ5pj65GrAS0IAAT14Ntvm7X1G5NPDn5nCJ74iiECrF+D7RzdgU1cOHOybk+fqVWsTtjbdsLjQqd8uJ6olIYDJNs9RP4SmPTVt7SsqfyreXVbjzVUTM/MhLCOPCFxqb2w6bsz02My3XHpiqn6U3T6uHJontQNUp4sS5HYruA2rAAAAN3tHbGr7nz/uXTMeaop4eNu1dFFuO+Z+jrfNddNFPFVO0Pqiiq5VFNMbzLUY9m9kX6LFi1Xdu1zzaaKKZmqqe6Ih1Gr6DY2pgUf0zFN7Wsi3zrWHExNONTP6Vzvq7qfh7kg6ha2/yUaJT9z028/cmTR7C5cp4zR+1w/Rpj4ZQ1qOblajm3c3Nv138i7Vzq6654zMolq9VkzxU8lHjP9Jt6xTiRw1ctfhH9/wxwE1AEkch27v6E1v+h827wwc6uKaZmei3d6onzT1T6EbvaappqiqmZiYnjEx2ON+zTftzRV0u+NkVY92LlPPC5qGfCE2tExb3Rh0dMcLWXTEdn6Nf0T6Hc8lG5aNy7TsXq6+OZjcLOTHbzojoq80x0/C6HWtOx9W0rJ07Lp51nItzbq7449seWGQsXK8PI5ejkluMi3Rn4vJ0xvHep6M7X9MyNG1nL0vLj8djXZt1THVPDqmPJMdLBbSmYqjeGBqpmmZiecAevAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEpeDzoH3buDI1u/Txs4NHNteW7V9VPH4YT45Dkh0b+hti4NFdHNvZNP3RcievjV0x8nBut36tb0PbWfqt2eEY9mZp8tU9FMemZhjc67OTkzt3Q3enWYxcSOLq3lBXLxuL+l92TptivjjadHi+jqquT+VPo6I9Eo7fTJvXMjIuX7tU1XLlU11TPbMzxl82sx7MWbcUR0MXk35v3ark9IA7OAADb7S3BqG2tZtalp9yYqp6LluZ9jco7aZ8ixmFe21yjbXpruWaMizV+Xbq6Llivu49cT5e1Vx0Ow91Z+09ZpzcWZuWavY5FiZ9jcp+iY7JVufhefjjt8lccy003UPs8+buctE87dcofJvqm2blzLxIqzdL64u0x7K3HdXH09XmcIt3t7WNO3Fo9vUMG5Tex71PCaZjppntpqjvjuRtyh8kljKi7qO2YosX541VYc9FFf8Akn9GfJ1eZEw9V5fN5HJPX807O0bePO43LE9HyQaPvm4mThZVeLl2Lli9bnhXbuUzTVE+Z8F5E78sM7MTE7SLOci1uaOTrTeNPDnc+rz8apVkhavkztTa2FotFVPNn7konh5+n6VNrk/4aY7V/wCT1O9+qez4uiAZdr3ri+WvHpyOTnUudM8bfMuU8O+K4+t2jm+U2xGRsLWbdXV9y1VemOn6HfFq4b1E9sI+XTxWK47J/hVQBu35yDJ03AzNSzLeHgY1zIyLk8KaKI4zKdOTrkow9K8TqW4Ioy86OFVNjrtWp8v60x8HnRMrMtY1O9c8vUmYeBdy6tqI5OvocPyc8mOobgqoz9Vi5g6b0THGOFy9/lieqPL8CVd06zofJxtamzg41qi5MTGLjU9dyv8AWq7eHfLb703Lp+1dErz8yeNXDm2bNM+yuVdkR5O+eyFYt0a7n7i1i7qeo3Jru19FNMfk26eymO6IVFmm7qVfHd5KI6Pr+V3kV2dKt8FrluT09X10Q+Ou6rna1ql7UdRvTeyLs8apnqjuiI7IjuYINDERTG0MzVVNU7zzgD14AA77kO3B/Q28beJeuc3F1DhZq49UV/oT8PR6VkFM7ddVu5TcoqmmqmYmmYnhMTHatjsXWY17amBqfGJuXbURd8lcdFXywzet4+1UXY6eSWq8n8nipqsz0csIo8IvQvEajh6/Zo9hkR4m9MR1Vx00z6Y4/AiNarlM0eNc2VqOFFEVXYt+NteSunpj6Y9Kq0xMTMTHCYT9Iv8AnLHDPPTyK3W8fzWRxRzVcvv6XgC1U4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA3GzNL/AKa3Tp2mTHGi/fpiv/LHTV8kS06TfB306Mrd+RnVRxpw8eZj/NVPCPk4o+Xd81Zqr6oScKz56/RR1ysBRTTTRFNMRERHCIjsRL4R+rTa0nA0aivhORcm9cjvpp6I+WfkS3KtvLrqf9Ib/wAizTVxt4dumxHn4cavlnh6GY0m15zJiZ6OVrtaveaxZiOnkcGA17EAAAAAAOr5Nt5ZW0dX8bEVXcG9wjJsxPXH60ftQsxo+pYWr6dZ1DT79N7HvU86iqPVPdPkU8dtyV74yNqapFnIqruaVfq/HW+vmT+vT5e+O1Ualp8X485R+b+V3pOqTjz5q5+WfD+k5b52Vo+68Sacu34nLpj8VlW44V0+Se+PJPyK8712frG1MzxWfZ5+PXP4rIo6aK/qnyStNg5ePnYlrMxL1F6xdpiqi5RPGKol+NSwMPUsO5h52PbyLFyOFdFdPGJU2HqNzFnhq5aepe52l2suOOnkq6+vvU6W92tbm1trS7VUcKqMO1TMeaiELcoHJPm6fkzm7dpry8Kurpx+u5a6ez9aPlTzRTFFFNERwiI4QlatlW79uiaJ35/giaLiXce5ci5G3N8XoPVG0Lxrt0Wacjbmo2a44xVi3In4stk+OXbi7i3bUxxiuiqmfTHB9UztVEvmuOKmYU3nrdLsbZesbry+bh2ptYlE8LuTcieZT5I758kO22DyTZGZmf0huOirHw4qmaMXjwrud3O/VjydfmTZg4mNg4tvFw7FuxYtxzaKKI4RENNm6tTb9C1yz19EMlp+iV3fTvckdXTPyaTZWz9H2rhRZwLPPv1R+Nya4/GXPT2R5IZ+59bwdv6Ne1PULsUWrcdFPH2VdXZTEdsy+mvarhaLpV/UtQuxax7NPGqe2e6I75lWblC3hnbu1ab97jaw7czGNj8eiiO+e+qe2VVh4lzNucdc8nTPwXOdm2tPtRRbjl6I+P1zsXe259R3TrNefm18LcTzbFmJ9jao7o8vfPa0QNbRRTRTFNMbRDFXLlVyqaqp3mQB9PgAAAATh4N2r+NwNR0W5X7KzXGRaif1auirh5piPhQe7XkV1KdO5QMKOdwoyYqsVeXnR0fLEIWo2vO49Ue/9k/S73mcqievk/dZiqmKqZpmOMT2Knb90qrRd46pp0xwpt35mj/JV7Kn5JhbJAvhHadFnceFqVNPCMnH5lU+WmfqmFFot3hvzR1x/DRa/Z48eK/Zn+fqEVgNUxwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD0Hg+tuxfuf2dm5V5qZl97Gl6lfq5tnAyrk91NmqfoeTVEc8vYpmeaGGNvRtncVcxFGh6jMz1f1av6mfRsHeVfDm7ezunvpiPXLnN+3HPVH7usY92rmpn9nMpj5CNX25oeh51/U9WxMXLyciKeZcq4Vcymnon0zVPwORs8lm97lMVf0RTRE/r5NuJ+czsbkd3jd/tKdPsf6mRx+bEoWXdxr9ubdVyIjsmE7Cs5ePdi5TamZ7YlMt3f2zqKKqo3Bg1cImeEV9Mqx61m16jrGZn3Jmasi/XdnjPH8qqZSLj8ie46p/H6jptuP2aq6v9sMu3yH6lMx4zXMWI7ebZqn6UXErwsSZmm5vum5tGoZsUxVb22+umURiarfIda4R4zXq+PbzbEfWzbPIlo9NEeO1fMrq7ZpophKnVsWP1eEocaLmT+nxhBAsHjcjG2Lc8b2TqF7yeMin6GbY5ItmW6uNeLl3o7q8mr6ODnOs40df7OtOg5U8+0e9W8WfscmeyLNUVU6DbqmP171yqPgmrg2FvZW0qOHN25pfR341M+uHKdcs9FM+DrT5PX+mqPH5Ko8H0osX6440WblUeSmZW6taLo9qmKbWlYNFMdUU49EfQyqMbHopimixbppjsppiHKddjoo8f6do8nJ6bnh/aomPpGq5EcbGm5l2P2bNU/QyrG19x36uba0TUKp/wBCqPoW1pppp6KaYjzPXOddr6KPF1jydo6a5/ZDHI/9+m3c2NN1DQdQr0m/V08aP7Cqf0o49nfHpTO9eKnJyPtFfHwxE9i6xMb7Nb83FUzHacAeo6U8evHoDweg8JAEDcqcb53PqM0RoGo2dLsVz4i14v8AKn9erh2+pH13buvWuPjNGz6eHXxx6vqW6OELmzq9VmiKKaI2hRZGh0365rquTvKnNeFmUTMV4l+mY7JtzD41U1UzwqpmJ7phcmbVueuimfQ+F3TtPvTxu4ONXPfVZpn6EiNd66PH+kSfJzqueH9qeC3GXtvb+XTEZOiabdiOrn41E8Pka7L2Bs3Kp4XdvYVP+lTNv5sw6065b6aZcqvJ27+muFVxZm9yWbHuRMRo825ntpybv01MK5yPbPqmeFGdR5sj64dI1rHnon697jOgZUc0x+/9K5ifbvIrt+apm3qGfRHZEzTP0MPJ5EMCqrjj63k0R3V2qZdY1fFnp8HKdEzI/T4oOZOmZVeDqONm2/y7F2m5T09tM8UuZPIfc5v9W16nnf8AiWOj5JYV3kQ1iKfxWs4Vc91VuqPrff3li1Rtxfy5/dOZTO8UfwlGjfuzqqYqjcODHGOPTXwR5y7a5t7W9vYdWmati5eRZyfyLdXGebNM8Z+SGkuci+66ePMytKrjs/HVxM//ABYF7kl3rRMxTg493y05VH0zCvx8fCtXIuU3ebuWmVk5961NuuzyT1RLgx1uTyb71x6ubVoN+vy266K/VLCydlbsx6edd29qER5LM1epdRkWZ5q4/eFBVi36eeif2lz42tW3dfpiZq0XUIiO/Gr+ph3MDOt1TTXh5FMx2TbmH3FdM80uc26454Yw/ddq5RPCu3VT544Pw+3wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP3atXbtXNtW67k91NMy/D9UV10TxoqqpnvieDySO1scfb2v5EccfQ9TvR30YldXqhl2Nm7sv1xRRtzVImf18aqiPhmIa2nVNTojhTqOXTEd16qPpZtrdO5LVMU0a5qERHVHj6vrcavPfp28Uij7P+rfwbS3yb72rqiP6Bv0+WquiPpZtHJRvOqOM4NijyVZFP1tTjb63dj/2evZv/dXzvWzcflN3pZnjGsVV/wCe3TV9CPVGb+mafFJonT/1RV4Npi8j27LsTN37is+Sb3H1QzcbkV1+uvhe1HBtU98c6r6Grtcrm9KJiaszGriOyrGp+hm0ctG6qY4Ti6XV57NX0VI9Ual0TSlUTpXTFX13Nna5D86Z/Ga7jRH7NmqfpZ1rkNx+MTc3FdmO2KcWPtNXjct2sUx/WNGwbk99FdVH1s/E5cY6furb3ptZX10o9cap9bJVE6P0+PE2lvkS2/FPC5quqVT2zTNuP9sthjcj20LVuKblOffqjrqryOEz8EQ1WPy36RVVwyNFzbcd9Fymr6mbb5aNrVVRFWNqVEd82qfoqRao1Lp3+u5LonSejh+u9t8Tkt2TjxPHSZvTPbdv1z9LLs8nmzLNcVU6BizMfrc6r1y1lvlb2XVw45mTTx78epnWuUrZdymKv6btU+SqiqJ9SNVGd08Xil0Vad+ng8Gzo2jti3PGjQdOpmO7Hp+pmWtG0i1Tzbel4VMd0WKfqa3H3vtO/Tzrev4P/dc5vrZ+Pr+iZFPOsavgXI/ZyKfrR64v/q38Uqicefy7eDMtYmLa/ssazR/loiH1immOqmI9D5Y+Zi5E8LGTZu/5K4n1PtxcJ36XeNtuQ4QcIDi8fQAD14AA9AeA9B49HgAAA9eAAAAA9eD0B4AA9AeD0B4PXgAAPXj14D149AeAAAAcDhD14Bwh5NFE9dMT6HoDHuYGFdnjdw8euf2rUSxcjQdEv0zTe0nBrjy2KfqZmRl42P8A2+RZtcf164p9bCydwaFjxxv6xgW/PkU/W6U+c/Tu5V+a/VsxL2zNqXaZpr2/p0xPdYiPUwa+TfZVfHjoNiPNcrj1VM29vXalqmZr1/A4R3XYn1MK5ykbLo4//nLE8O6mqfoSKftf6eLxRa/sX6uHwYF7kl2XXXNUYORb49lOTXw+WWBl8jG1btcTZydTx47qbtMx8tMthe5Wdl25mIz79fD9XHqlgXuWbatFfCixqN2O+mzEeupJo+8eji+u9Fr+6+nh+u5g5PIho1Uf1fWc+3P/AIlFFfqiGFd5DbfD8XuKuZ/axY+0zsrlu0Sif6tpGfd/zVUUfTLByeXK1FP9W29XNX/iZUcPkpSafvTo38ESv7n6dvdxMKvkQ1GJnma5izHltVMK/wAi24aK5i1n4FynsnjVH0Mq/wAt+q1UzFjRMK3V2TXdqq+pr73LPuuumYox9MtzPVNNmqZj4akmiNT6dvBErnSOjf3b/F8cnke3baj8V9xXv8t7h64Yd7kq3pbomqnT7Vzh2UX6ZmflfS5ytb1r48M7Ho/y41H1MC5yj7zuVTM65ep49lNNMR6kmiM/pmnxRa5039MVeD8XOTvetuJmrb+VPD9WaavVLXXdqbntcZubd1aIjrn7jucPh4Pvk703VkXJrua9ncZ/VuzT6mDla9reV/xGrZ1yO6q/VP0pNH2n9XD4otf2X9HF79mBetXbN2q1et127lM8Kqa6ZiY9Evw/VdVVdU1V1TVVPXMzxl+UhEkAegAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD3jI8AfqmuqieNFU0z3xPBkWNR1CxVzrGdlWp76LtUeqWKPJiJ53sVTHM3ljd26rMxNvceqxw7Jy65j4JlnW+UPelEcI3BlT54pn1w5Ucpx7U89Mfs6xk3qeauf3l3FrlU3pbpimdRt18O2qxTM+pl43LBu61TMXKsO95arPD1SjxI3JbsDTN4aRk5V/UsjHyMe/4uq3RRExzZpiYnjPp+BGyLOJZo466I27kzGyM2/XwW65372Tj8tO4qK4m7g4F2nu5tVP0s23y4alE/jNDxJj9m7VDb3eRHTYtVTb1rL5/CebxtU8OKEMi3VZv3LNcTFVFU0zExwmJieCPYs4GVvwU83fCTkX9RxNvOVc/dKZ7PLlZ4xF7blyO+acqJ+Tmtha5bdvTEeN0rVKJ7ebFuqPnQgQdJ0jFn9PjLlTreZH6t/dCxljlg2dcoiqu5nWZ/Vqx5mY+CZZ+NyobKv08Y1eLfkuWa6Z9Ssg5TouPPNM/XudqdfyY54j6961WNvvaGRTzrev4UcP1rnN9fBn4249AyY42NZwK/Nfp+tUYc50O30VS60+UV3pohcaxn4N+eFnMx7k/sXaZ9UvvFVM/k1RPmlTWi5co/IuV0+aeD72NRz7FXOsZ2Tanvou1R6pcp0Lqr8P7dqfKPrt+P9LiHQqVjbp3LjV8+zr2pUz75rn1y2WLyib0x7kV0a/k18Oy5FNcfBMOVWh3eiqHanyisz+aifBaMRByU7n39ujUqpvZGLVp1mY8ffuY0RP+Wnm8OMz8iX1XkY9WPXwVTEz2LjFyqcmjzlMTEdoEzEdMiOkgAAAAAAh3lR3fv3a+qRYprw6cK77LHyaMbjzo/VnnTMRVDgszlL3rlcOdrdy3Ef4Nqij1QtbOk3b1MVxVG0/XUp7+t2bNc0VUzvHZ/az/ABg4x2yqjk713ZkUTRd3DqM0z2Rfmn1Nff1vWb9PNvatn3KZ7K8iuY9aRGhV9NcIlXlFb6KJW7rvWaI413bdMR2zVEMWvV9Jo487U8KOHXxv0/WqHVk5FX5V+7Pnrl85mZ65l1jQo6a/D+3KfKOei34/0tnf3ZtqxVNN3XNPpqjs8fT9bAyOULZ1irm169izP7HGr1Qq0OkaHa6apcavKG90UR4rMZXKpsqxPCNUruz/AOHYrn6Guy+WXaVmPxVvUcj/ACWYj51UK8DrTouPHPvLlVr+VPNER7v7Trlct+kUx/VdEzrs/wDiXKKPVxa7K5crsx/VtvUUf6mTNXqphDb6WLVd+/bs26ZqruVRTTEdszPCHWNKxaf0+MuNWs5lXNV4QlDK5bNcuU8LGl4Nqe+Zqq+lgZPLDu27TwtzhWfLTZ4+uXXUciGmcyOdreXzuHTwtU8OLkuVHk/0/aGk42XY1LIyL1+94uKK7cRHCImZnjHoRrNWnV1xRRTyz2Sl36dUt0Tcrq2iO2GFc5Vt51UzEZ9mnj202KeLBuco29a54zr+TH+WmmPocoLOMSxHNRH7QqJzcieeuf3lvr+8t2XquNe49V/7cqumPklrcrVNTyq5rydRy79U9c3L1VU/LLDHWm1RTzRDlVduVfmqmfe/Vdddc8a66qp8s8Xjwfbm94z3vAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAASt4OGpeI3Dn6ZXVwpyrEV0xx/Son6pn4EUuh5OdU/ofeumZtVXNtxeii5P7NXsZ9aLm2vO2KqexLwL3mciivtWtVa5VtL/onfuqWIo5tu7d8fb6/wAmv2XrmY9C0sdSFfCR0nhe03WqKJ4VROPcnzeyp+lndHu8GRw9cNTrtnzmNxR+md0NgNYxYAAAAAA6TYG0c/durRjY9NVvFtzE5ORw9jbp7v8ANPZDG2dtrUN0axRp+BTwjru3ao9jap/Wn6u1Z7aug4O3NGs6XgUcLdEcaq5j2VyrtqnyqvUdQjGp4afzT4LfS9MnKq46/wAkePY++haTg6LpdnTtOsU2ce1TwiI65ntmZ7Znve63quBo2nXNQ1LJox8e3HTVVPXPZER2z5Gm31vXSNp4fOy6/HZddPG1jUT7Kryz3R5VdN4bq1fdGf8AdOpX/YUzPirNHRRbjyR9Klw9PuZVXHXyU9fW0GdqdrDp83Ry1dXRHf8AJ1e++VHUda1C3Y0ua8PTLV2mrhx4V3uE8eNU9kdHVHp4rDRMTHGO1TFcDbt6rJ0DTsiueNV3FtVzPlmiJSdXx6LNFuKI2jl+CJoeVcv3Lk3J3nk+LPeD1RNEPjm3YsYl69PVbt1VT6I4vs1W78j7l2tql/8AUxLk/wDxl9URxVRD4uVcNMyhfk/5VMvSsucHXa7mXp9VyeZdnpuWeM//ACjydcJ003NxdRwrWbg37eRj3aedRconjEwpy6bY29NX2nl87Dr8di1VcbuLcqnmVd8x3T5fW0+dpVN307XJPhLJadrVVn0L3LT19MLMbi0bA17Sb2m6jZi5Zux6aZ7KonsmFYN8bWz9q6zXg5lM1WquM2L8R7G7T3+fvhZHZ27NI3Tg/dGm3/xlMfjbFfRctz5Y7vK+u8duafufRrmnZ9umePTau8PZWq+yqP8A70qrCzK8K5wXI5OmOpcZ+Dbz7UXLc+l0T19ipQ2u6dB1Dbmr3dN1G1NFyieNFUfk3KeyqJ7YaprKaoriKqZ5GLroqoqmmqNpgAfT5AAAAHUclemzqm/NMsc3nUW7vjq+jj0UdP0Q5dMfg36LNV/Udeu0dFMRjWJnvnprn4ObHplEzrvmseqr65U3TrPnsmint3/ZNaC/CR1CLmtadptNXHxNmbtUceqap4R8kJ0nojiqrymatOtb41PNirnWovTatd3Mo9jHw8OPpZ/RrXHf4uqGm169wY3B7UubAatjAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB68AWr5Nda/p7Zmn51dXOvxbi3en9unomfT1+k5StDp3Bs3PwIp43oo8bYnuuU9MfD0x6UZ+Dnr8Ws7M29fr4Rfjx+Pxn9KOiqPTHCfRKb5jjDGZducXKnh6J3hvMK7TmYccXTG0qZVUzTVNNUTExPCYl47Tli27O395X5t08MTN45FjujjPsqfRPH0TDi2vs3Yu0RXTzSxF+1VZuTbq54AHRyAAGy23omo7g1a1pum2ZuXrk9M/o0U9tVU9kQ+OjabmavqdjTsCzVeyL9XNopj1z3RHXMrJ7I23pOw9t13Mm/Zpu83xmZl3J4RPkjupjshAzs2ManaOWqeaFlp2nzlV71clMc8tjsfbGBtXRKMDEppquTwqv3uHCq7X3z5O6OxyPKVyo4mi+M0zQ6qMvUOmK7nXbs/aq8nU5DlK5VMjVaLulbfmvGwp403MjquXY7o/Vj5ZRbMzM8ZnjKvxNMquVedyeeej5/JZZur026fM4vJEdPy+b76jm5eo5lzMzsi5kZF2edXcuVcZmWOC+iIiNoZyZmZ3l6tZybXar2w9FrrnjP3JRHHzRw+hVJZ3kYuVXOTrTOdVzubFdMeSIqlTa5H+Gme1feT1W1+qOz4uxHrxl2vHM8qWR9zbA1i5w4zONNHxpin6XTuG5c8iqxyc50UcPxtdq3PmmuJ+hIxaeK/RHbCNmVcOPXPZP8K0gN0/OmZo+p52kahbz9Oya8fItzxpron5J748if8Ak25TMDcUUYGqTbw9T6qY48KL3+WeyfJ8Cuj2mqqmqKqZmJieMTHYh5eFbyqfS5+tOwtQu4lW9PLHTC1HKDtLC3bo1WLeiLeVb41Y1/h00VeXvie2FY9b0vN0bU72nahZmzkWauFVM9U90x3xPek/k05V7uHFnStzXKruPHCm3mcONdEdkV/rR5evzu85RtoYG9tEt5WDdsfdtujnYuTTMTTXE/ozMddM/Iqca7d0+55q9+WeaV1lWbOp2/PWPzxzx9eEqzjI1HDytPzr2Fm2K7GRZqmi5RVHTEwx2hiYmN4ZeYmJ2kAegAD2ImZiIjjM9S1XJtokaBs3Awaqebemjxt7v59XTPwdXoQPyPbe/p/eWN42jnYmHMZF7o6J4T7Gn0zw+VZuGd1vI3mmzHfLUeT+NtFV6e6Pi0PKDq9Gh7P1HUKqoium1NFry11dFMfDKqFVU1VTVVPGZnjKYPCN17xmThbes1+xtf1i/ET+lPRTHwcZ9KHkzR7Hm7HFPPUg65k+dyOCOan+ekAWylAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAZ+39Tv6NrWJqeNP4zHuRXEd8dsemOhbPRNRx9W0nF1LEq51nJtRcpnu4x1eeOpT1M/g87npiLu2Mq7wmZm7iRPb210x6/hU2sYvnLfnaeen+F7oWX5q75qrmq/n+3Y8sm2Z3FtS5VjWufm4fG9ZiI6ao4eypjzx8sQrOud1wrjy1bSq0DcM5+La4afnTNdExHRRc/Sp+mPP5EbRsvbexV7kvXsLfbIp7p+Eo/AaJlx98DEyc/MtYeHZrvX71UUUUUxxmqZfKimquumiimaqqp4RERxmZ7kg6JqOl8n+BORTboz90X6OHNnpt4VM9kz2198R5ujt43rk0RtTG8zzR9dDvYtRcq3rnamOefrpdztzB0Hkr27OfrV+3c1jJp6aaOmuf2KPJHbPUivfm9tW3ZmTVk1+IwqZ/E4tE+xpjvn9afK0utarqGs6hcztSyrmRfrnpqqnqjuiOyPIwUfHwooq87cneuenq7krKz5uURZtRw0R0dfeAJyuAAFjPB/uTXsCimZ483JuR5upXNPXg23OdtfUbU1ceZmcYjuiaIVWsU742/VMLjQqtsuI64lKj14Mk2z1GfhF5FdrZONZp6r+dRTV5opqn1xCTEP8AhL3qo07RceJ9jXeu1zHliKYj50p2m08WVRCv1WrhxK57EIANowIAA7Hk939qm1Mmm1NVWVptU/jMaqrq8tE9k/JLjhzu2qLtPDXG8Olm9XZriuidpTvvTQ9G5SdAjX9t3aKtTsU8KqOqquP1K47Ku6f/ALEF3bddq7Xau0VUXKKppqpqjhMTHXEs/b2t6noGo052l5Vdi7HRVET7GuO6qO2HTbozNM3pjxq2HYt4WvUR/W8WJ4U5Mfr2++rvp6/Oh2LdeLPBM70dE9Xf2J2Rct5keciNq+mOie2O3scOPZjhPCXiwVo9iJmeERxmXiQORTaf9P7ijPy7U1afgzFdXGOi5c/Rp83bPm8rlfvU2bc11c0O2PYqv3It088pY5HNsRt3aluu/Rwzs3hevzMdNMfo0eiPlmXWatn4+l6Zk6hlV82xj25uVz5IhlQh7whd0RbsWdsYlfs7nC7lzE9VP6NPp6580Mfaorzcnl6efubi9Xb0/F5OiNo70R7j1bI1zXMvVcrouZFya+bx6KY7KY80cIa4G0ppimIiOZgqqpqmap55AHrwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAZOm5mRp2oWM7FuTbv2LkXLdUdkxPFjDyYiY2l7EzE7wtnsjcGNubbmNqmPVEVVRzb1vj027kdcT6/NMPru7QcPcehZGl5lPCm5HGiuI6aKo6qo8yqumaxq+l0V0abqudhU1zxrjHyK7cVT5ebMcWZ99u6vdNrX8dd+0oKtGrpucVuvbqaWnXqKrXBdo35OXtYu4dIzdC1jI0vPt8y9YrmmZjqqjsqjvietr2VqWo6hqV6L2o5+VmXaY5sV5F6q5VEd3GqZYq+o4uGOLnZuvh4p4eZ9LF27Yuxds3KrdynqqpnhMeaX4mZmeMzxeD6fIAAAAAAmnwZ7seL1uzzunnWaop+PEz6kLMzTNU1PTK669N1HLwqq44V1Y96q3NUd082Y4o2ZYnIszbidt0vByYxr9N2Y32+S4QqX99u6vdNrX8dd+0ffbur3Ta1/HXftKP7iue3DQ/iK17EraIP8JW9VOq6Rj8fY02K6+HlmqI+hHf327q902tfx137TA1LUtR1K7Td1HPys25THNpryL1VyYjuiaplKw9Kqx70XJq32Qs/WaMmxNqmmY3YgC7UAAAAA9pmaZiaZmJjqmHgD2qZqqmqqZmZ6ZmXgA2G3tJy9c1jH0vBo516/XzY7qY7ZnyQtRtLQcLbehY+lYVHsbcca6567lc9dU+f/APiqOm6jqGm3pvadn5WHdqjmzXj3qrdUx3caZjobD77d1e6bWv4679pWZ+HdytqYq2iFtpufZw96qqZmqf4We3dr2JtzQcnVcyfY2qfYUcem5XPVTHnlVTW9SytX1XJ1LMr59/IuTXVPZHHsjyQ/Wpa1rGp26bepatn5tFM8aacjIruRE98RVMsB9YGBGLEzM7zL51LUpzKoiI2pgAWKrAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAASHyF6FpOvbhzsbV8KjLtW8Tn0U1TMcKufTHHomOyXK/eizbm5VzQ7Y9iq/di3TzyjwWj/Bxsn3P4/wAev7R+DjZPufx/j1/aVX35Z9mfD5rn8PZHtR4/JVwWj/Bxsn3P4/x6/tH4ONk+5/H+PX9o+/LPsz4fM/D2R7UePyVcFo55N9kzHD738f8A9yv7TDy+SnZF+meZpVzHqn9K1k3PVMzHyPY1ux0xPh83k+T2THNVHj8laBNe4ORG1NFVzQdXriuOqzmUxMT/AN9MdHxZRRuPQNX29nfcer4VzGuT00zPTTXHfTVHRMJ+Pm2cjkoq5epW5OBfxuW5TydfQ1YCUhgJr5FNobb1zZ1ebqulWsrIjLroiuqqqJ5sRTwjonyyjZWTTjW+OqORKw8SvLuebonae1CgtH+DjZPufx/j1/aQhyy6Tp2i71uYOl4tONjxj26ot0zMxxmJ4z0yj4upW8mvgpiYSszSbuJb85XMTHNyOLAWKrBM3IbtPbuvbTyszV9LtZd+jOrt011VVRMUxbtzEdEx2zPwu9/Bxsn3P4/x6/tKq9q9qzcmiYneO5c4+iXr9uLlNUbT3/JVwWj/AAcbJ9z+P8ev7R+DjZPufx/j1/acvvyz7M+Hzdvw9ke1Hj8lXBaP8HGyfc/j/Hr+0/F3kz2Pcp4VaDaj/LeuU+qo+/LHsz4fN5+Hsj2o8fkq+LEanyN7TyaZ+5K87Bq7PF3ufT6YqiZ+Vwu5eRrX8Cmq9pGTY1S1HTzOHirvwTPCfh9CTa1XGuTtvt3ot7Rsu1G/Dv3cv9oxH2zcXJwsmvFzMe7j37c8K7d2iaaqZ8sS+Kwid+WFXMTE7SAPQAAB1eztgbj3Pzb2Hixj4c//ALWRxpon/L21eiOHlc7l2i3TxVztDpatV3auGiN5coLAaByMbfxKaa9WysrUrvbTTPirfwR7L/5Ouwdk7Rw6Ypsbd02eHVNyxFyfhq4yq7mtWKZ2piZXFrQMiuN65iPFVEW9/oHQubzf6F07h3fctH1MDO2TtHNpmm/t3TY49c27EW5+GnhLlGu2+miXarydubclcKoif9f5F9v5dNVekZeVpt3spqnxtv4J9l/8kVbw2DuPbHOvZmLF/Dif+Kx+NVuP83bT6YT8fULF+dqZ5eqVbk6Xk48b1U7x1xyuVATleAADtuRfR9N1vef3FquJRlY/3Ncr5lUzEcY4cJ6J8qbfwcbJ9z+P8ev7SuytTt41fBVErTD0m7l2/OUTER2quCaeW7aO3NC2hZzNJ0u1i5FWbRbmumqqZmmaa5mOmfJCFkjFyacm3x0xyIuZiV4tzzdc7z2ACSigAA6nkp03C1ff2m6fqOPTkYt3xvjLdUzEVcLVcx1eWIT1+DjZPufx/j1/aV+XqNvFriiqJnk3WeFpV3MtzXRMRETtyquCduV3Zm2NH2JmZ+maRZxsm3Xaim5TVVMxxriJ657pQS7YmVTlUcdMbdCPm4deJc83XO87b8gCSOQnQNH1/VdStaxg0ZdFqxTVRFUzHNmauHHomHS/eixbm5VzQ541irIuxbp55RuLR/g42T7n8f49f2j8HGyfc/j/AB6/tKv78s+zPh81x+Hsj2o8fkq4LR/g42T7n8f49f2j8HGyfc/j/Hr+0ffln2Z8Pmfh7I9qPH5KuC0f4ONk+5/H+PX9o/Bxsn3P4/x6/tH35Z9mfD5n4eyPajx+SrgtH+DjZPufx/j1/aa7dGwNn4u2tUysfQ7Fu9Zw71y3XFdfGmqKJmJ6+97TrVmqYjhnw+b5q8n79NMzxRyd/wAlbQFyogHYbG5PNe3VEZFqinDwOPTlX4nhV/kjrq9Xlc7t2i1TxVztDpas3L1XBbjeXHix2gckW09OopqzbV/VL0dM1X65pp4+Smnh0efi6zD23t7Dp4Yuh6bZ8tGLREz6eCpua3ZpnaimZ8F3a8n79Ub11RHiqKLh16XpldPNr07EqjumzTP0NXqGytpZ9Mxk7e07jPXVbsxbq+GnhLnTrtH6qJdKvJ25EejXH7f/AFVAT7r/ACLaFlU1V6PnZOn3Oyiv8bb+XhV8sov3bye7m23TXeycP7pxKf8A9nG410RHfVHXT6Y4eVYWNQx7/JTVy9UqzJ0vJx43qp3jrjlckCWOQfbOha/g6rc1jTreXVZu24tzXVVHNiYq49Ux3O+Tfpx7c3KuaEfFxqsm7FqmdplE4tH+DjZPufx/j1/aPwcbJ9z+P8ev7Ss+/LPsz4fNb/h7I9qPH5KuC0f4ONk+5/H+PX9o/Bxsn3P4/wAev7R9+WfZnw+Z+Hsj2o8fkq4LR/g42T7n8f49f2j8HGyfc/j/AB6/tH35Z9mfD5n4eyPajx+SrgtH+DjZPufx/j1/aPwcbJ9z+P8AHr+0ffln2Z8Pmfh7I9qPH5KuCwvKHsXaenbK1XOwtFs2cmzYmq3ciuvjTPGOnplXpPxMujKpmqmNtlZm4VeHXFFcxO/LyACWhgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACVPBs9tWpe8f99KK0qeDZ7atS94/76UHUvVa+5YaV65b709vzXXTR+VVTT554P0iXwlv7i0n31X81ksaz5+7FvfbdtcvI+z2aru2+yVvHWf8AFo+NB46z/i0fGhTQXX3D/wBnh/ag/Ec/8fj/AEuZF23M8IuUTPkqftTBvNvbs3DoN+i5puqZFummemzVXNVuryTTPR9L5r0KqI9Gvl7n3R5R0zPp29o79/hC2bWbm0LTdxaTd03U7EXbVcexq/St1dlVM9kw1XJtu2zu/QPu2LdNnLs1eLybUT0U1cOMTH7M9npjsdQpaqa7FzaeSYaCiq3kW945aZVH3foOVtrcGTpGX7Kq1VxouRHCLlE9NNUeePgnjDUJn8JfT7cVaPqtNMRcmLmPcnviOFVPrq+FDDZ4V+b9imuedgs/HjGyKrcc0cwsR4PHtBr9/XPm0K7rEeDx7Qa/f1z5tCHrPq3vhO0H1v3SkdXHwgPzh3fetr1Sscrj4QH5w7vvW16pVWi+se6fgudf9V98fFHwDVsYsD4N/tHzf3lX/KtJORj4N/tHzf3lX/KtJOYrUPWa+9v9M9Ut9z81XLdM8Kq6aZ7pl+fHWf8AFo+NCvnhEe3637xt/OrRun4+j+etU3OPbfs/tW5OuzYu1W/N77T1/wBLl+Os/wCLR8aH7pqpqjjTVFUeSVMX7s3btm5Fyzcrt1x1VUVTEx8DrOg/9nh/bjHlH12/H+lzBV3b3KLu3RblPitVu5dmOuzlzN2mY7uM+yj0TCaOT7lK0jdFVGFfp+4NTmOixXVxpuf5Ku3zT0+frQMnS71iOLnjsWWJq+Pkzw809re7v2nou6MKbGqYsTciOFrIo6LtvzVd3knoV03/ALM1PaGoxayo8fiXZn7nyqY4U1+Se6ryetahr9w6Pga9pF/S9RsxcsXqeE99M9lVM9kw8wdQrxqtp5aer5PdR0y3l08UclfX81QBuN46Bl7Z3BkaTmeym3PG3ciOEXKJ/Jqjz/JPGOxp2voriumKqeaWHroqoqmmqNpgfqimquuKKKZqqqnhERHGZl+U1cg+yKItUbr1SzFVUz/ULdUdUdt2Y7+74e5wysmnGtzXUkYeJXlXYt0+/sh9+TDkps49u1q+6bMXb88KrWDV002+6bnfP7PVHbx7JdpppppimmmKaYjhERHCIh6w9Y1PB0jTruoalk0Y+NajjXXXPyR3z5IY+/kXcmverlnoj5N1j41nEt8NHJHTPzZj4ZmXiYdvxmXlWcej9a7cimPhlBO9+V/VdQu14u3YnTsTq8fVETer8vdT6Onyo0zcvKzb9WRmZN7JvVddy7XNdU+mVlY0W5XG9ydvGVVk6/atzw2qeLt5oWu++za3P5n3y6Pzu77tt/W2eHmYmbb8Zh5VjJo/WtXIrj4YU3fbDysnDv05GJkXse9T+TctVzTVHmmOlIq0Knb0a/BEo8o6t/So5O9cl5XTTXTNFdMVU1RwmJjjEwgLZHK/qunXaMXcUVajh9XjoiIvW/L3V+np8qc9H1LB1fTrWoadk0ZGNdjjRXTPyT3THdKnysK7jT6ccnWvcPPs5cehPL1dKK+U/kps37d3V9rWItX441XcGn8mvvm33T+z1T2cOqYQrpqoqmmqmaaonhMTHCYlc5DPLzsiiLde69Ls82Yn+v26I6+PVdiPX8PetdM1KZmLN2e6fgptX0qmKZv2Y264+MIWAaJl0i+D3+cH/wBHd9dKxSuvg9/nB/8AR3fXSsUyes+s+6G00H1X3z8Ea+EX7RMf94W/mXFelhfCL9omP+8LfzLivS30b1b3ypNe9b90AC1UwADs+RL85+kf+d/JuLOKx8iX5z9I/wDO/k3FnGW1z/fHd8ZbHye9Wq/9T/EOG5dvza5/+pZ/mUq0rLcu35tc/wD1LP8AMpVpWOierz3/AAhVeUHrUd0fzIlvwaf771f3tR85EiW/Bp/vvV/e1HzknU/Va/rpRNJ9co+uiU6PzXXRR+VVTTx754P0h7wmf+B0P/VveqhlMWx5+7FvfbdtMzI+zWaru2+3zS746z/i0fGg8dZ/xaPjQpoLn7h/7PD+1B+I5/4/H+ly/HWf8Wj40HjrP+LR8aFNA+4f+zw/s/Ec/wDH4/0uX46z/i0fGhqt5XbU7Q1mIuUTP3Bf/Sj/AA6lSR9U6Hw1RPH4f2+a/KKaqZjzfP2/0AL9m0hcjWyKdz6nXqGo0TOlYdURVT/j3OvmeaOiZ88R29FirNu3ZtUWrVum3bopimmimOEUxHVER2Q57ky0u3pGxdJxaaYprrx6b13vmuuOdPHzceHodIxeoZVWRenqjmb3TMOnGsRycs8s/XYPjk5WLi0xVk5NmxE9U3K4p9aKeW3f+oaRnRt7RL049/xcV5ORT+XTzuqinunh0zPX0xwQjk5F/KvVX8m/cv3aumqu5VNVU+eZSsTSK79EV1VbRKJm63Rj3Jt0U8Uxz9C32PqmmZFXNx9RxLtXdRepqn5JZimDc6NuncWjVUzpus5limnqt+Mmqj4s8afkSK9Cnb0K/wB4RbflHG/p2/2lbYQftblqy7VVFjceBRkW+qcjGjm1x5Zonon0TDtN48oGkWthZWr6JqNq/fux4ixFM8K6LlUT0zTPTExHGemOxW3NOyLdcUTTz9PQtreqY1y3NdNXNG+3ShblWydKyd85/wDQ+JYx8a1V4qfFRwpuV0/lV8Orr4x0dfDj2pE8GmuijTda51dNPG9a654dlSEpmZnjPTLxqL2JF3H8xv1cvPzMfj502sn7Rw78/Jzc65fjrP8Ai0fGg8dZ/wAWj40KaCq+4f8As8P7XH4jn/j8f6XL8dZ/xaPjQ/cTExxieMSpitlye+0TQv3fZ+ZCDnad9kpiri337P7WOnap9trmnh227d/g3r8TdtRPCblETH7UP2qPvX25a3+8Mj+ZU54GF9rqmOLbZ11HUPsVNNXDvv27LaeOs/4tHxoPHWf8Wj40KaCy+4f+zw/tU/iOf+Px/paXlTu2p5PNaiLlEzONPRFUd8KtAtMHD+yUTTvvvKo1DO+21xXw7bRtz7gCagAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACVPBs9tWpe8f99KK0qeDZ7atS94/76UHUvVa+5YaV65b709ol8Jb+4tJ99V/NS0iXwlv7i0n31X81mdN9ao+uhrdW9Tr+umEFANowQDc7d2vr2v36LWl6ZkXqap6bs0zTbp8s1T0Q+aq6aI3qnaH1RRVXPDTG8pI8Gbxv3drkxx8V4uzzu7nca+HycU3OX5NdpWdobfjC8ZTey71XjMm7EdFVXDhwjyR2eme10t+7asWa7165RbtW6ZqrrqnhFMR1zM9kMXn3qb+RVXRzN9ptirHxqaK+f6lEfhL5NFOm6Nh8fZ13rl3h3RTER/uQe6zlV3PG6d2XsuxM/cVinxGLx6ONMTPGrh5ZmZ83Ducm1On2Zs49NNXP82O1O/Tfyaq6eb5CxHg8e0Gv39c+bQrusR4PHtBr9/XPm0I2s+re+EvQfW/dKR1cfCA/OHd962vVKxyuPhAfnDu+9bXqlVaL6x7p+C51/1X3x8UfANWxiwPg3+0fN/eVf8AKtJORj4N/tHzf3lX/KtJOYrUPWa+9v8ATPVLfcrx4RHt+t+8bfzq0bpI8Ij2/W/eNv51aN2pwPVqO5jdS9bud4AmIQ/Vuuu3XTct1VUV0zE01UzwmJjth+QFi+RjfFW5dNq0zUrkTqmJTEzVM9N+31c/zx0RPnie1Iio20NZvbf3Jg6tZmfxF2JuUx+lRPRVT6YmVt7Vyi7aou26oqorpiqmqOqYnqlkdVxIsXeKnmqbbRs2cmzNNf5qf46Ebcv+3adT2vTrVi3xytNnjVMR01Wqp4VR6J4T5uPer2uRqGLazsDIwsinnWci1VarjvpqjhPrU9zse5h5t/Eu/wBpYuVW6/PTPCfUs9EvzVbm3PR8VT5QY8UXabsfq/mG22JoVe5N1YOkxxi3cr516qP0bdPTVPwRwjyzC1+PZtY+Pbx7Fum3atUxRRRTHCKaYjhEQhnwatMpm9q2s109NNNGNanz+yr9VCalfrN+a7/B0UrPQseLeP5zpq/iHzyb9nGx7mTkXKbVm1RNdyuqeEU0xHGZlWLlO3nlbt1qqaaqremY9Uxi2ero/Xqj9afkjo7+MpeENr1eBtrH0exXNN3Ua58Zwnp8VRwmY9MzT6IlX9N0bEiKfP1c88yv17Nma/s9M8kc4AvmcAAHYcl288naWtU+Mrqr0zIqinKtdfD9umP1o+WOju4ceOd21TdomiuOSXSzers1xXRO0wuZYu2r9i3fs3Kblq5TFdFdM8YqpmOMTHkeZNm1k49zHv26blq7RNFdFUdFVMxwmJ9COPB812vUtqXdKv1zVe025FNHGenxVXGafgmKo83BJbEZFmbF2aJ6H6FjX6cizTcjpVL3zoVe3N1Z2k1cZt2rnGzVP6Vurppn4J6fLEtImPwldMppydJ1iinprprxrs+b2VPrrQ42OFe8/YprnnYXPx4x8iq3HN0d0pF8Hv8AOD/6O766VildfB7/ADg/+ju+ulYpndZ9Z90NRoPqvvn4I18Iv2iY/wC8LfzLivSwvhF+0TH/AHhb+ZcV6W+jere+VJr3rfugAWqmAAdnyJfnP0j/AM7+TcWcVj5Evzn6R/538m4s4y2uf747vjLY+T3q1X/qf4hw3Lt+bXP/ANSz/MpVpWW5dvza5/8AqWf5lKtKx0T1ee/4QqvKD1qO6P5kS34NP996v72o+ciRLfg0/wB96v72o+ck6n6rX9dKJpPrlH10SnRD3hM/8Dof+re9VCYUPeEz/wADof8Aq3vVQzml+tUe/wDiWr1j1Ov3fzCEQGyYMAAAAABcLQK6bmhafco/IqxrdVPmmmGa4fkT121rOxsXHmuJydPiMa7Tx6YiPyJ8008PTEu4YO/bm3dqonol+kY12LtqmunphXXwgNLyMTfdeoV0VeIz7NFVuvh0c6imKKqfPHCJ9MI6W83NoOmbi0uvTtVx4vWaummY6KrdXZVTPZKE908jeuYVdd3Q79rU8fri3VMW70R6fYz8MeZodO1K1NuLdydpjk7GX1TSb0XartqN4nl7YReMzVNL1HSsjxGpYOTh3f1b1uaZnzcethrqJiY3hQTTNM7SAPXgAAAAtlye+0TQv3fZ+ZCpq2XJ77RNC/d9n5kKPXP9dPe0Pk7/ALa+74t6qPvX25a3+8Mj+ZUtwqPvX25a3+8Mj+ZUjaF+evuSvKL/AF0d8tQA0rKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACVPBs9tWpe8f99KK0qeDZ7atS94/wC+lB1L1WvuWGleuW+9Pb53rNm9ERetW7kR1RXTE8PhfRq9w7g0fb9m1e1jOoxLd2qaaKqqap50xHHh0RLG001VTtTHK3ldVNNO9U7Qy/uDB/8A8eP/AO1T9R9wYP8A/jx//ap+pzf4Sdkf9fs/+1c+yfhJ2R/1+z/7Vz7Lv9nyPZn9pR/tWL7dP7w6WnCw6Z404lime+LcMhyVPKRsiZ4RuCx6bdcf7W00rdW29VuU2tP1vAv3auq3F6Irn/tnpfFVi9TG9VM/tL7oyLFU7U1R+8M3WM27gYVWRa0/Lz6qf+VjRTNc/GmFfOVDfm49avXNJysK9o2HE+yxKomm5c6eia5mI4x5Ijh51j2r3HoGk7hwKsPVsO3kW+HsapjhXbnvpq64lIwcm1Yr4q6N+3qRtQxLuTbmm3Xt2dfv51RB1XKRs3L2frEWKqqr+Df41Y1/hw50R101ftR9U+blWwt3KbtMV0TvEsLdtV2a5orjaYFiPB49oNfv6582hXdYjwePaDX7+ufNoVus+re+FtoPrfulI6uPhAfnDu+9bXqlY5XHwgPzh3fetr1SqtF9Y90/Bc6/6r74+KPgGrYxYHwb/aPm/vKv+VaScjHwb/aPm/vKv+VaScxWoes197f6Z6pb7lePCI9v1v3jb+dWjdJHhEe3637xt/OrRu1OB6tR3MbqXrdzvAExCAAFruTfJqy9haJernjV9x26Jme3mxzfoVRWr5MbFWPyfaHbqjhM4lFfxvZfSo9c281T3tD5O7+er7vi6RVHlKs02N/a5bpjhE5tyv40876VrlU+U27F7lA1yumeMRmV0fFnh9CLoe/nau5M8otvM0d/wTL4PFmLWwa7kR03s25VPoppp+hI6OfB5vU3NgVURPTazblE/BTV9KRldn7/AGmvfrWmm7fZLe3Ur34RWTVd3xYsTM8yxhUREeWaqpmfV8CNEk+ETj1Wt9Wb0x7G9hUVRPliqqJ9UfCjZq9P2+zUbdTGanv9rub9YAmIIAAACUPBwyare8c3F4+wvYNVUx+1TXRw+SZT+r94OOPVc3pmZHD2FrBqiZ8tVdHD5IlYFkdY2+0zt1Q22hb/AGSN+uUbeETZi5sO1cmOm1nW6onz01x9KvKxHhEXqbewrduZ6budbpj0U1z9Cu640bf7N75UWvbfa/dCRfB7/OD/AOju+ulYpXXwe/zg/wDo7vrpWKVOs+s+6F3oPqvvn4I18Iv2iY/7wt/MuK9LC+EX7RMf94W/mXFelvo3q3vlSa9637oAFqpgAHZ8iX5z9I/87+TcWcVj5Evzn6R/538m4s4y2uf747vjLY+T3q1X/qf4hw3Lt+bXP/1LP8ylWlZbl2/Nrn/6ln+ZSrSsdE9Xnv8AhCq8oPWo7o/mRLfg0/33q/vaj5yJEt+DT/fer+9qPnJOp+q1/XSiaT65R9dEp0YOraRpWrU26dU07FzYtzM0RftRXzePXw49XUzmLqGo6fp8UVZ+fi4kV8Yom/epo53Dr4cZ6WOp4t/R527r4Zp9Lmaz7zdp+5rSf4Sj6j7zdp+5rSf4Sj6mR98u3P8Ar+lfxlv6z75duf8AX9K/jLf1u3Ff658XDhxuqnwY/wB5u0/c1pP8JR9R95u0/c1pP8JR9TI++Xbn/X9K/jLf1n3y7c/6/pX8Zb+s4r/XPicON1U+DH+83afua0n+Eo+pXblYw8XA5QdVxMLHtY2Pbro5lq1RFNNPG3TM8IjyzKyP3y7c/wCv6V/GW/rVw5W8nHy+UTVsjFv2r9muu3zblquKqavxdMdEx0SttHm7N6ePfm6e+FJrsWYsU8G2+/Rt1S5QBpGVbzZW5tQ2rrVGo4M86mfY3rNU8KbtHdP0T2LK7O3Zo26cGMjTcmPGxHG7j1zwuWp8sd3ljoVOfbDycnDyaMnEyLuPfonjRctVzTVTPkmOlXZunUZXpc1XX81pp+qXMP0eenq+S5Irztvlh3Jp0U2tTt2dVsx0ca/xd3h/miOE+mJlIug8rm09R5tGXdv6Zdno4ZFHGjj5KqeMcPLPBnr2mZFr9O8dn1u0+Pq+Le/VtPbyf07vMxcbMsVY+Xj2cizV+Vbu0RVTPonocPuLkm2nqkVV4ti7pd+ennY1XsOPlonjHDzcHbafnYWoY8ZGBl2MqzPVXZuRXT8MMhFt3rtmfQmYTLuPZyKfTpiYVx3XyTbl0amu/hU0atjU9POsRwuRHlonp+LMuArpqoqmiumaaqZ4TExwmJXNcBypcneHuXEuahp1q3j6xRTxiqOEU5H7Nfl7qvh6Oq7w9ZmZim/+/wA2fztBiKZrx/2+St4+mRZu49+5Yv26rd23VNFdFUcJpqieExMd75tCzAAAtlye+0TQv3fZ+ZCpq2XJ77RNC/d9n5kKPXP9dPe0Pk7/ALa+74t6qPvX25a3+8Mj+ZUtwqPvX25a3+8Mj+ZUjaF+evuSvKL/AF0d8tQA0rKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACVPBs9tWpe8f99KK0qeDZ7atS94/wC+lB1L1WvuWGleuW+9PaJfCW/uLSffVfzUtIl8Jb+4tJ99V/NZnTfWqProa3VvU6/rphBQDaMEAAlHkh5RNQwdWxtD1jKrydPyK4tWq7tXGqxVPRT0z+jx4Rwnq648s/Ka4lF25lWrdiJm9VXTTb4dfOmej5VymX1qxRbrpqpjbffdr9AyLl23VRXO/Dtt73L8qWh29f2Tn400RVfs25yMeeHTFdETPCPPHGn0qsLnVRFVM01RxiY4TCml6mKbtdNM8YiqYiUrQrkzRXR1beP/AMQ/KK1EV0VxzzvH7f8A1+FiPB49oNfv6582hXdYjwePaDX7+ufNoSNZ9W98I2g+t+6Ujq4+EB+cO771teqVjlcfCA/OHd962vVKq0X1j3T8Fzr/AKr74+KPgGrYxYHwb/aPm/vKv+VaScjHwb/aPm/vKv8AlWknMVqHrNfe3+meqW+5XjwiPb9b942/nVo3SR4RHt+t+8bfzq0btTgerUdzG6l63c7wBMQgAGdoGm39Y1rD0vGiZu5N2m3E8OrjPTPmiOM+hbzEsW8XFs4tmnm2rNFNuiO6IjhCK+QfZVzTrH3y6pZ5mTfo4YluqOm3bnrrnumrs8nnSyymr5UXrsUU81P8tnoeHNizNyvnq/h8su/axcW9lX6ubas0VXK6u6mI4zKnup5VedqOTm3Py8i9Xdq89UzM+tYPl53DTpO0KtMtXOGXqc+KiInpi1H5c+nop/7p7ldE/RLM026rk9PwVvlBkRVdptR0c/vTR4NOpU8NX0euqOd7DJtx3x+TV/s+FM6qXJ1r87b3fhanVMxjxV4vIiO23V0VfB1+eIWrt10XLdNy3VFVFURNNUTxiYntV+sWJov8fRUs9CyIuY3B00/wi3wi9DrzNv4mt2KJqrwLk0XeH+HXw6fRVEfGlAi5Odi4+dh3sPKtU3bF+ibdyirqqpmOEwq5yibSy9pa7XiXYqrw7szViX5joro7p/ajqmPT1TCfo2VFVHmaueOZW69hzTX9opjknn73MgL1nQAAHTcnW08vduvUYlumqjDtTFeXejqoo7o/anqj4eyXxcuU26Zrqnkh92rVV2uKKI3mUs+DvoleDtnJ1i9RNNzULsRb4/4dHGIn01TV8EJQfHCxrGFh2cTFtU2rFmiLduinqppiOEQ+l25RatV3btdNFuimaqqqp4RER1zLD5N6b92q5PS/Q8WxGPZptx0fUoY8JbU6Zr0jR6Ko50RXk3I8/safVWhlv+UHXp3Ju3N1SJnxNVfMx4nst09FPw9fnmWgbDBszYsU0TzsLqGRGRk1VxzdHuSDyAXIo5RLNMz03Ma7THwcfoWOVT5M9Rp0rfuj5ldXNojIi3XM9UU1xNEz8FS1ih1uiYvxV1w0nk/XE49VPVKO/CDsVXeT6blMcYs5lqurzeyp9dUK6Lcby0enXtr6hpE8IqyLMxbmeqK46aZ+NEKl5Nm7jZFzHv26rd21XNFdFUcJpqieExPpT9EuRNmaOmJ/lXeUFqab9NzomP4fMBdKAAB3PIVYqu8pWn3KY4xZt3q6vN4uqn11Qsshnwb9CuU/d+4r1E0010/cuPMx+V0xNc/DFMfCmZkdYuRXkzEdEbNtodqbeLEz0zM/D4OC5e7kUcnGVTM9Ny/apj40T9CtqdfCU1Gm3oml6VFXs7+RVfqiO6inh0+mv5EFLnR6Jpxt+uZUWu1xVlzEdERHx+Ilvwaf771f3tR85EiW/Bp/vvV/e1HznbU/Va/rpR9J9co+uiU6Ie8Jn/gdD/1b3qoTCh7wmf8AgdD/ANW96qGc0v1qj3/xLV6x6nX7v5hCIDZMGAAAAA9ppqqqimmJqqmeEREcZmQeDut4cmeuaBo2NqlNM5dmbNNWXTbp9ljV8OMxMdtMfrfDwcK5Wr1F6nioneHW9YuWKuG5G0gDq5MrTdQztNyYydPzMjEvR+nZuTRPyJQ2Lyw52PkW8PdERlY1UxT910UcLlvy1RHRVHmjj50SiPfxbV+Nq4+aTjZl7Gq3t1bdnQuXj3rWRj28ixcpu2rlMV0V0zxiqmY4xMT3Po4HkEyr+TyeWKL0zVGPfuWrcz+rxiY+dMeh3zFX7XmrlVHVLf497z1qm51xur14QmjW9P3fZ1GxRFNGo2efXEf4lPRVPwc2fPxRqmzwmoo+5dCqn8uK78R5uFHH6EJtdplc14tEz9bMRq1uLeZXEd/7xuAJ6uFsuT32iaF+77PzIVNWy5PfaJoX7vs/MhR65/rp72h8nf8AbX3fFvVR96+3LW/3hkfzKluFR96+3LW/3hkfzKkbQvz19yV5Rf66O+WoAaVlAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABKng2e2rUveP8AvpRWlTwbPbVqXvH/AH0oOpeq19yw0r1y33p7RL4S39xaT76r+alpi6hp2n6jRTRqGDi5dNE8aab9qmuKZ744x0Mni3osXqbkxvs2uZjzkWKrUTtup0Lc/extv3PaT/B2/qPvY237ntJ/g7f1Lz79o9iWd/Dtz24/ZUZ9cTGyMu/TYxce7fu1fk0WqJqqnzRC2lO2tuUzxp0DSonyYdv6mfiYmJiUczExrOPT+ratxTHyPKtdp29GjxfVPk5Vv6VzwQ9yScmWdjanY17cVmLHiJi5jYlXTXNfZVX3cOuI6+PXw4dM0DyZiImZnhEdcqXJyrmTXx1r/ExLeJb4KGt3VqdvRtt6hqlyqKYx8equny1cPYx6Z4R6VQ0qcuG+7Os3I2/o96LmDZr52Repn2N6uOqI76Y7+2fNxmK2j0jGqs2pqq56v4ZTW8um/eimid4p/npFiPB49oNfv6582hXdYjwePaDX7+ufNoNZ9W98PdB9b90pHVx8ID84d33ra9UrHK4+EB+cO771teqVVovrHun4LnX/AFX3x8UfANWxiwPg3+0fN/eVf8q0k5GPg3+0fN/eVf8AKtJOYrUPWa+9v9M9Ut9yvHhEe3637xt/OrRuuBn6No+ff8fnaVgZV3m83n3seiurh3cZjqfD72Nt+57Sf4O39Sxx9Yos2qaJp5lVlaHXfvVXIriN5VGFufvY237ntJ/g7f1PpY0DQbFXPsaJptqqO2jFoifkh2+/aPYn93D8O3Pbj9lWNB25ruu3Yo0rS8nKiZ4c+mjhRHnqn2MemUy8nfJLi6VdtaluKu3m5lE863jU9Nq3PfPH8qfk86U6YimIimIiI6IiHqDk6vevRw0+jHj+6yxNEsWJ4q54p8P2GHrOpYWj6Zf1LUL1NnGsU86uqfVHfM9UQxtzbg0nbmnzm6tl0WKP0Keuu5PdTT1zP/2VdOUffWobvzYpmKsbTbNXGxjRPb+tV31fJHZ2zPDCwK8mrfmp6/k76hqVvEp256uiPm1u+tyZW6dxX9UyImi3PsLFrjx8Xbjqjz9s+WZaIGxoopopimnmhhrlyq5VNdU7zInXkH3rRmYVG19SvRGVYp/qddU/2luP0PPT2eTzIKfTHvXce/bv2Lldq7bqiqiuieFVMx1TE9ko+Xi05NuaJ9yRhZleJdi5T7464XLa3cmh6buHS7mm6pjxes19MT1VUVdlVM9kw4Tkv5T8TWrdrSteu28XU44U0XquFNvI7vJTV5OqezuSax92zdxrm1XJMfXI3Vm/Zy7W9PLE/XKrfvjku13QLteRp9q5qmn9cXLVPG5RH7VEdPpjjHmcDMTEzExMTHXErnNTq+2tv6vVNepaNhZNyeu5XZjn/G6/lW2PrdVMbXad+2FLk+T9NU72atuyVRnsRMzwiOMrPfgz2Nz+f/QFvj/r3eHwc7g3OkbY29pFcV6do2Dj3I6rlNmOf8aen5UmrXLUR6NM+H9olHk7emfSriI98/JAex+TDXtwXaL+bar0zT+ubt6jhXXH7FE9PpnhHnWA21oWmbd0q3pul48WrNHTVM9NVyrtqqntlsxS5efdyp9LkjqX+FptnEjenlnrERcvO9aMbEr2tpl7jkXo/rtdM/kUT/y/PPb5POzuVHlQxdHtXdJ0C7Rk6lMTTXfpmKreP3+SqrydUdvcgK/du371d+/cruXblU1V11zxmqZ65me2VjpenTNUXrscnRHxVesarTFM2LU8s88/B+AGkZR7EzE8YnhK1HJpuOjc20sTOmuJyrdPicqnti5THTPp6KvSqs6rk13hk7Q1z7oiKruDf4UZVmJ/Kp7Ko/ajs9Mdqu1LEnJtej+aOZaaTnRiXvS/LPP81pUW8rnJrVrt2vXNCpop1Hh+PsTPCL/DtieqKvP0T5J65G0bU8HWNOtahpuTRkY12ONNdM/JPdMdsSzGWs37mNc4qeSYbHIx7WXa4a+WJ+t4U3z8PLwMqvFzca7jX6J4VW7tE01R6JfBcLVdJ0zVbUWtT0/FzKI6ovWqa+Hm49TnrvJrse7Xz6tAsxP7N65THwRVwXtvXLcx6dM79n1DOXPJ27E/464mO3k+arzt+T7k61jc+RbyMi1cwdK4xNeRXTwm5Hdbievz9UeXqTzpey9qaZcpuYeg4NFyn8muq3z6o801cZhv3HI1uao2tU7dsu+N5PxTVxXqt+yPmxdKwMTS9Osafg2abONYoii3RHZH0z5WTMxEcZnhD1EXLVyhWsfGv7a0S/FeTciaMy/RPRap7aIn9aeqe7q6+qox7FzJucNPPPOvMnJt4lrjq5o5o+CO+VrcVO5N5ZOTYr5+Hjx9z40xPRVTTM8avTMzPm4ORBtrVum1RFFPND8+vXar1yblXPIlvwaf771f3tR85EiW/Bp/vvV/e1HzkTU/Va/rpTdJ9co+uiU6Ie8Jn/gdD/1b3qoTCxNQ03TtRpop1DAxcyKJmaIv2abnN49fDjHQyuJfixepuTG+zZ5uPOTYqtRO2/zU7FufvY237ntJ/g7f1H3sbb9z2k/wdv6l39+0exLPfh257cfsqMLc/extv3PaT/B2/qPvY237ntJ/g7f1H37R7En4due3H7KjC3P3sbb9z2k/wdv6j72Nt+57Sf4O39R9+0exJ+Hbntx+yoyQuQrbX9NbsjUci3zsPTeF2eMdFV39CPRMTV6I73H7qt27W59VtWqKbdujNvU000xwimIrnhER2Q6Hky35mbPy67Ndr7p0y/Xzr9mOEVRPDhz6Z7+EdU9E+TrWeV5y5jz5rnmFTh+at5NPnuaJWcnpjhKNt8ckuj61XXmaPXTpWZVxmqmmnjZuT5af0fPHR5Hbbc17Stw6fTnaTl0ZFqfyojoqonuqjriWzY+3du41e9M7S3F2xZy7e1URVH1zSqruTYu6NAqqnO0q9XZj/n2I8ZbmO/jHV6eDmlz2s1Db+hahXNedo2nZNc9POu41FU/DMLm1rkxG1yn9lHe8nYmd7Vf7/NUNu9q7W1vc2ZTY0vCrro48K79UcLVvy1VdXo6/IszY2jtWxXFdrbmlU1R1T9yUTMfDDc2rdFq3TbtUU0UUxwpppjhER5nt3XOT/HTy9r5s+Tvpb3K+TsarZ+hY+29u4mj41U102KfZ1zHCa65njVV6ZmfQ245nlC3fgbS0erJv1UXcy5Exi43HpuVd891Mds/So4prv3No5ZloaqrePa3nkpphE/hGatby90Yel2qoqjAsTNzhPVXc4TMfFimfSi5kalm5Oo6hfz8y7N3IyLk3Llc9szPGWO22NZ8xapt9T8/y7/2i9Vd6wB3RxbLk99omhfu+z8yFTVsuT32iaF+77PzIUeuf66e9ofJ3/bX3fFvVR96+3LW/3hkfzKluFR96+3LW/wB4ZH8ypG0L89fcleUX+ujvlqAGlZQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAASV4P2padpm5dQu6ln4mFbrw+bTXkXqbcTPPpnhE1THSjUccizF63NuZ53fGvzj3abkRvstr99u1fdNov8da+0ffbtX3TaL/AB1r7SpQqPuK37crv8RXfYhbX77dq+6bRf4619o++3avum0X+OtfaVKD7it+3J+IrvsQtr99u1fdNov8da+0+GTvjaGPTNVe49NmI/w78V/N4qoj2NDt9NUvJ8orvRRHisVrXLDtPCoqjBnK1K52RatTRTx8s18J+CJRZvblL3BuW3XiU1U6fgVdE2LFU8a47q6uufN0R5HECZj6bj2J3iN57UDJ1bJyI4ZnaOqPrcAWCtE78hOu6Hpuya8fUdZ07DvTmXKvF38qi3Vwmmnp4TMTwQQIuXjRk2+CZ2S8LLqxLvnKY3W1++3avum0X+OtfaQHy4Z2FqO+7mTp+Zj5dice3EXLF2K6eMRPGOMTwcMI2JplGNc44q3S83Vq8u35uqmI5dwBZqlOPIDrmi6Zs7LsalrGn4V2rUK64t5GTRbqmnxduOPCqY6OMT0+RIn327V902i/x1r7SpQqL+kUXrk3JqnlXmNrlyxaptxRE7La/fbtX3TaL/HWvtH327V902i/x1r7SpQ4/cVv25dvxFd9iFtfvt2r7ptF/jrX2n4u7x2nbjjVuXSJ/wAuXRV6pVND7it+3J+IrvsQszqnKnsrBpnm6nXl1x+hj2aqpn0zEU/K4PcvLXm36arO39NpxInoi/kzFdfnimOiJ88yiISbWkY9ud5jfvRL2t5V2Nonh7mZq+p6hq+bVm6nmXsvIq667lXGeHdHdHkjoYYLOIiI2hUzVNU7yAPXgAA73ZfKjuDb9FGLkzGqYNPRFq/VPPojupr6/RPGPM4Icrtm3ep4a43h1s5FyxVxW52lZTb/ACrbR1Smmm/l16benroyqOEfHjjTw88w7DB1PTs+iK8HUMTKpnqmzeprifglTsVFzQ7VU+hVMeK7teUN6mNrlMT4fNc8Vb5N935O1dxW8u5Xcu4V38XlWuPHjR+tEd8dcemO1Z7CysfNw7WXiXqL1i9RFdu5RPGKonqlT5uDXi1REzvE9K+0/UKM2mZiNpjoaneu47O19Fq1S/g5eXbpqimYsUxPNmeqapmeiOzigfenKhuHcNFzFsVRpmDX0TZsVezrjuqr6580cIWRvW7d61XavW6bluumaaqKo4xVE9cTHbCI968jVnJv15m2cm3izVPGcS/M+L4/s1RxmPNMT54SNMvYtFX+WOXonoRdWsZlyn/BVydMRz/XYg8d5RyS72qv+LnT8einj/aTlUc35J4/I7faHIviY1yjJ3JmRmVU9P3Nj8abfHy1TwmY80Qvruo41uN+Lfu5Wbs6VlXatuCY7+RC8adnzpdWqRiXvuKm5Fqb/Mnmc+YmeHHv6P8A7xYi3Wr6Bpuo7bv6BVj27OFcteLpot0REW/1ZpjqiYnhPoVT17S8rRdYytLzaObfxrk0Vd090x5JjhMeSXxg58ZXFG20x/DpqOm1YXDO+8T/ACwQFiq292juvWtrZk39KyubRVP42xX7K1c89Pf5Y4T5UzbY5Y9v59FNvWLV3S8jqmrhNy1M+SYjjHpj0q+CFk4FnI5ao5euE/E1LIxeSieTqnmW903XtE1KmKsDV8HJ49lu/TVPpjjxhslMH0ovXqI5tF25THdFUwrKtCjf0a/D+1vT5Rzt6Vvx/pcbJycbGo5+TkWrNP61yuKY+Vy2u8pGz9Ioq5+r2su7HVaxPxsz5OMexj0zCr9UzVPGqZmZ7ZePu3oduJ9OqZ8Pm53PKK5MehREd87/ACSTvjla1jWrdzC0i3VpeHV0VVU1cb1ceWr9GPJHwo3eC3s2LdinhtxspMjJu5FXFcneQB2cBKHg+appml6xqlzUtRxMKivHoiirIvU24qnndUc6Y4ovHDIsxftzbmdt3fFyJx7sXYjfZbX77dq+6bRf4619o++3avum0X+OtfaVKFT9xW/bld/iK77ELa/fbtX3TaL/AB1r7R99u1fdNov8da+0qUH3Fb9uT8RXfYhbX77dq+6bRf4619o++3avum0X+OtfaVKD7it+3J+IrvsQtr99u1fdNov8da+0ffbtX3TaL/HWvtKlB9xW/bk/EV32IbLdNy3e3Pqt6zcouW6829VRXRPGmqJrmYmJjrhrQXdMcMRDPVVcVUyzdH1XUdHzac3S8y9iZFPVXbq4cY7pjqmPJPQlTa/LXkWqKbO4tN+6IjonIxeFNXponomfNMeZDw4X8SzkR/kpScbNv40/46tuzoWk0flF2bqcR4rXMexXPXRk8bMx5ONXCJ9EuixtQwMmmK8bOxr1M9U27tNUfJKnIq69Dtz+WuY8fkuLflFciPToifD5rlXcjHtRM3L9qiI65qriGl1Xem1NMpmcvX8CJjrot3YuV/Fp4yqePKdCoifSr8P/AK+q/KOuY9GiI9+/yTbuvlqsU0V2NtYNVy5PR905UcKY8tNETxn0zHmlD2sann6vn3M/U8u7lZNz8quuePojujyR0MMWmPh2cePQj39Kmys6/lT/AJJ5OroAEpEAAFm9i7m23jbL0XHyNw6TZvW8GzTXbuZlumqmqKI4xMTPGJVkELMw6cqmKZnbZOwM+rDqmqmN91tfvt2r7ptF/jrX2lX933bV/dmsX7Fyi7auZ1+uiuiqJpqpm5VMTEx1xLVD4wtPpxZmYnfd1z9TrzKYpqp22AFgrAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB3vJdyh5W1LsYGdFeTpFyrjNETxqszPXVR5O+n0+fghyvWaL1E0VxvDtYv3LFcV252lcHRNW03WsCjO0vMtZWPX1VUT1T3THXE+SelnKfaLq+qaNl/dWlZ1/DvdtVqvhzo7pjqmPJLvdL5Z90Y1EUZmPp+dw666rc0Vz8WeHyM7f0S7TP+Kd48Wox/KC1VG12Np7OWFhBA+Ry365VRMY+j6dbq765rqj4ImHK7g5Rd3a1RVav6rXj2Kuu1ix4qPNMx7KY8kzLnb0bIqn0todbuvY1MejvP12px3zyh6Dte3XZqvU5uoRHscWzVxmJ/bq6qfX5Fd92a/nbl1u9quoeLi7c4UxTbp4U0Ux1RHfw756WqeL3D0+3i8scs9bO52p3cydquSnqAE5XAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP/2Q==';
+document.getElementById('hdr-logo').src = LOGO;
+document.getElementById('res-logo').src = LOGO;
+
+// ─────────────────────────────────────────────
+// ⚙️  FORMSPREE — replace with your endpoint
+//    1. Go to https://formspree.io and sign up free
+//    2. Create a new form — set email to hello@bidquest.co.uk
+//    3. Copy your form ID (looks like: xpwzabcd)
+//    4. Replace xykdqvyz below with it
+// ─────────────────────────────────────────────
+const FORMSPREE_ID = 'xykdqvyz';
+
+// ─────────────────────────────────────────────
+// QUESTION DATA
+// ─────────────────────────────────────────────
+const DISCIPLINES = [
+  {
+    id:'Q', name:'Qualify',
+    desc:'Assessing opportunities against clear criteria to protect time and focus on winnable bids.',
+    questions:[
+      { text:'How does your organisation decide whether to bid for an opportunity?',
+        opts:[
+          {s:1,l:'We tend to bid if we recognise the client or the service — the decision is largely instinctive.'},
+          {s:2,l:'A senior person makes the call, but there are no formal criteria guiding the decision.'},
+          {s:3,l:'We informally weigh up a few factors before deciding, but the process varies each time.'},
+          {s:4,l:'We use a consistent set of criteria to assess each opportunity and make a documented bid/no-bid decision.'},
+          {s:5,l:'We have a structured qualification framework with defined criteria, clear ownership, and a formal decision process applied consistently to every opportunity.'}
+        ]},
+      { text:'How does your organisation identify and prepare for upcoming opportunities?',
+        opts:[
+          {s:1,l:'We find out about most opportunities when the tender is published — they come as a surprise.'},
+          {s:2,l:'We occasionally hear about opportunities in advance but don\'t actively track them.'},
+          {s:3,l:'We monitor relevant portals and frameworks to anticipate upcoming opportunities.'},
+          {s:4,l:'We maintain a pipeline of known opportunities and prioritise those we have prepared for in advance.'},
+          {s:5,l:'We proactively build and manage a forward pipeline, actively shape opportunities before they are released, and use this to inform our bid strategy and resource planning.'}
+        ]},
+      { text:'How does your organisation handle red flags or requirements you cannot meet?',
+        opts:[
+          {s:1,l:'We rarely check mandatory criteria early — issues sometimes surface during writing.'},
+          {s:2,l:'We are aware of red flags but proceed anyway if the opportunity looks attractive enough.'},
+          {s:3,l:'We check mandatory criteria before committing and would typically stand down if we can\'t meet them.'},
+          {s:4,l:'We have defined no-bid triggers — specific criteria that would automatically rule out an opportunity regardless of its appeal.'},
+          {s:5,l:'We have a clear and agreed set of absolute no-bid criteria, applied at the point of qualification, that protects us from pursuing opportunities we cannot realistically win or deliver.'}
+        ]},
+      { text:'How does your organisation manage competing bid opportunities and protect quality?',
+        opts:[
+          {s:1,l:'We take on most opportunities that come our way — it\'s hard to say no.'},
+          {s:2,l:'We are aware when we\'re overstretched but push on anyway, accepting that quality may suffer.'},
+          {s:3,l:'We try to prioritise but don\'t have a formal process for balancing the bid workload.'},
+          {s:4,l:'We actively review our pipeline and make deliberate decisions about which opportunities to pursue based on available resource and relative priority.'},
+          {s:5,l:'We have a disciplined prioritisation process — when a new opportunity arises, we assess it against live bids and resource capacity, and are prepared to stand down from lower-priority opportunities to protect quality.'}
+        ]},
+      { text:'How well does your organisation understand the buyer before committing to a bid?',
+        opts:[
+          {s:1,l:'We rely on what\'s in the tender documents — we don\'t research the buyer beforehand.'},
+          {s:2,l:'We have a general sense of the client but base this on assumption rather than research.'},
+          {s:3,l:'We research the buyer before deciding to bid, using publicly available information.'},
+          {s:4,l:'We assess our existing relationship with the buyer and consider whether a competitor may be better placed to win before committing.'},
+          {s:5,l:'We have a clear picture of the buyer\'s priorities, our relationship history, and the competitive landscape — including whether a competitor holds an incumbent advantage — and factor all of this into our qualification decision.'}
+        ]}
+    ]
+  },
+  {
+    id:'U', name:'Understand',
+    desc:'Developing deep knowledge of the opportunity, the client, and the competitive landscape.',
+    questions:[
+      { text:'How thoroughly does your organisation analyse tender requirements before any writing begins?',
+        opts:[
+          {s:1,l:'We skim through the documents and start writing based on our general understanding of the service.'},
+          {s:2,l:'We read the requirements but tend to focus on sections that match our offer — less relevant parts get less attention.'},
+          {s:3,l:'We read the full document and note the key requirements, though this isn\'t always done formally.'},
+          {s:4,l:'We conduct a structured review of all tender documents, logging requirements, evaluation criteria, and scoring methodology before writing begins.'},
+          {s:5,l:'We dissect every element of the tender documentation in a formal kick-off process, building a detailed compliance matrix that drives our entire response.'}
+        ]},
+      { text:'How well does your organisation know the client before the tender is released?',
+        opts:[
+          {s:1,l:'Our knowledge of the client comes from reading the tender documents — we don\'t research beyond that.'},
+          {s:2,l:'We have a general sense of the client, usually based on the sales team\'s view, but this isn\'t always validated.'},
+          {s:3,l:'We research the client using publicly available information such as their website, reports, and news.'},
+          {s:4,l:'We have an established relationship with the client and have gathered meaningful intel on their priorities, challenges, and preferences ahead of the tender.'},
+          {s:5,l:'We proactively develop client relationships as part of our pipeline strategy — by the time the tender lands, we have genuine insight into their drivers, preferences, and decision-making that goes well beyond the tender documents.'}
+        ]},
+      { text:'How well does your organisation identify whether a specification has been written with a competitor or incumbent in mind?',
+        opts:[
+          {s:1,l:'We don\'t look for this — we take the specification at face value.'},
+          {s:2,l:'We sometimes notice familiar language or tailored requirements but don\'t act on it.'},
+          {s:3,l:'We are aware this happens and flag it when we spot it, though we don\'t have a structured approach.'},
+          {s:4,l:'We actively review specifications for signs of incumbent or competitor influence and factor this into our bid strategy and qualification decision.'},
+          {s:5,l:'We have a disciplined approach to reading between the lines of a specification — identifying tailored requirements, incumbent language, or competitor product references — and use this intelligence to assess win probability and shape our response.'}
+        ]},
+      { text:'How well does your organisation understand the competitive landscape for a specific opportunity?',
+        opts:[
+          {s:1,l:'We don\'t research the competition — we focus on our own offer.'},
+          {s:2,l:'We have a general awareness of our main competitors but don\'t research them in the context of specific opportunities.'},
+          {s:3,l:'We consider who else might be bidding and factor this into our thinking informally.'},
+          {s:4,l:'We actively research the competitive landscape for each opportunity, considering who is connected to the client and how our offer compares.'},
+          {s:5,l:'We have a clear and evidenced view of the competitive field for each opportunity — including competitor strengths, weaknesses, and likely positioning — and use this to sharpen our own offer and win themes.'}
+        ]},
+      { text:'How does your organisation bring together the right knowledge and people at the start of a bid?',
+        opts:[
+          {s:1,l:'There is no formal kick-off — writing tends to start immediately once a decision to bid is made.'},
+          {s:2,l:'The bid lead or writer picks up the documents and begins without a formal briefing process.'},
+          {s:3,l:'We informally gather input from relevant colleagues before writing begins.'},
+          {s:4,l:'We hold a kick-off meeting with relevant stakeholders to share knowledge on the opportunity, client, and market before any writing starts.'},
+          {s:5,l:'We have a structured kick-off process that brings together bid, sales, subject matter experts, and senior leaders to pool intel on the opportunity, client relationship, and competition — the outputs of which directly inform our response strategy.'}
+        ]}
+    ]
+  },
+  {
+    id:'E', name:'Engineer',
+    desc:'Constructing a compelling offer and managing bid delivery with clear planning and ownership.',
+    questions:[
+      { text:'How does your organisation define what makes its offer unique before bid writing begins?',
+        opts:[
+          {s:1,l:'We describe what we do and respond to the specification — we don\'t specifically think about what makes us different.'},
+          {s:2,l:'We have a general sense of our strengths but don\'t formally translate these into themes for each bid.'},
+          {s:3,l:'We identify our key differentiators and make sure they are referenced somewhere in the response.'},
+          {s:4,l:'We develop defined win themes for each bid — specific, client-focused statements that link our strengths to the client\'s needs — and share these with the team before writing begins.'},
+          {s:5,l:'Win theme development is a structured part of our bid process — themes are evidence-based, tailored to the specific client and opportunity, agreed by the team at kick-off, and woven deliberately throughout the response.'}
+        ]},
+      { text:'How well does your organisation tailor its proposed solution to the specific needs of the client?',
+        opts:[
+          {s:1,l:'We largely present our standard service offer — the response describes what we do rather than what the client needs.'},
+          {s:2,l:'We make some adjustments to reflect the client\'s requirements but the core offer remains largely unchanged.'},
+          {s:3,l:'We review the client\'s requirements and shape our offer to address them, though this isn\'t always done consistently.'},
+          {s:4,l:'We deliberately tailor our proposed solution to reflect the client\'s specific challenges, priorities, and context as we understand them.'},
+          {s:5,l:'Our proposed solution is built around the client — every element of our offer is consciously designed to address their specific needs, demonstrating that we have listened, understood, and responded rather than simply replicated our standard pitch.'}
+        ]},
+      { text:'How does your organisation approach the planning phase before bid writing begins?',
+        opts:[
+          {s:1,l:'We go straight into writing once a decision to bid is made — planning happens on the go.'},
+          {s:2,l:'We have a brief conversation about who will write what before starting.'},
+          {s:3,l:'We produce a basic plan covering sections, owners, and the submission deadline.'},
+          {s:4,l:'We have a structured planning phase that defines the offer, win themes, response structure, individual responsibilities, and internal milestones before any writing begins.'},
+          {s:5,l:'No writing begins until a formal bid plan is in place — covering offer development, win themes, response architecture, section ownership, word budgets, review stages, and internal deadlines — agreed and signed off by all contributors.'}
+        ]},
+      { text:'How clearly are roles, responsibilities, and deadlines defined and managed throughout the bid?',
+        opts:[
+          {s:1,l:'It\'s generally unclear who is responsible for what — things get picked up informally as the deadline approaches.'},
+          {s:2,l:'People know roughly what they\'re doing but deadlines and ownership aren\'t formally tracked.'},
+          {s:3,l:'We assign sections to individuals and set a submission deadline, though internal milestones aren\'t always tracked.'},
+          {s:4,l:'We maintain a clear action log throughout the bid with named owners, internal deadlines, and regular check-ins to track progress.'},
+          {s:5,l:'Bid delivery is actively project managed — with a live action tracker, defined owners for every output, regular progress updates, and escalation points if deadlines are missed.'}
+        ]},
+      { text:'How involved is senior leadership in supporting and prioritising bid activity?',
+        opts:[
+          {s:1,l:'Senior leaders are generally not involved until they are needed to sign something off.'},
+          {s:2,l:'Senior involvement is ad hoc — they engage when they have capacity rather than as a deliberate part of the process.'},
+          {s:3,l:'A senior person is aware of live bids and is available to help unblock issues if needed.'},
+          {s:4,l:'Senior leadership is engaged at the start of each bid to endorse the decision to proceed and apply internal pressure for prioritisation where needed.'},
+          {s:5,l:'We have a defined senior sponsorship role for significant bids — a senior leader is briefed at kick-off, accountable for internal prioritisation, and available to intervene if resource or commitment becomes an issue, without being involved in day-to-day development.'}
+        ]}
+    ]
+  },
+  {
+    id:'S', name:'Substantiate',
+    desc:'Backing every claim with relevant evidence, data, and examples that build evaluator confidence.',
+    questions:[
+      { text:'How does your organisation maintain and use a bank of case studies and evidence?',
+        opts:[
+          {s:1,l:'We don\'t have a central bank of case studies — we pull together examples each time from memory or whoever is available.'},
+          {s:2,l:'We have some saved examples but they are not organised, regularly updated, or easy to retrieve.'},
+          {s:3,l:'We maintain a basic library of case studies that we draw on for bids, though it isn\'t always current.'},
+          {s:4,l:'We have a well-organised evidence bank that is updated regularly and contains case studies tagged to service type, sector, and common bid themes.'},
+          {s:5,l:'We maintain a comprehensive, up-to-date evidence bank with case studies, performance data, client testimonials, and accreditations — tagged and retrievable by theme, sector, and evaluation criteria — reviewed and refreshed as a standing process.'}
+        ]},
+      { text:'How well does your organisation select and tailor evidence to the specific client and opportunity?',
+        opts:[
+          {s:1,l:'We use the same examples regardless of the client or opportunity.'},
+          {s:2,l:'We try to pick relevant examples but don\'t always have time to tailor them properly.'},
+          {s:3,l:'We select examples that are broadly relevant to the sector or service type.'},
+          {s:4,l:'We deliberately select evidence that reflects the client\'s context and the specific requirements of the opportunity.'},
+          {s:5,l:'Every piece of evidence we include is consciously chosen because it will resonate with this specific client — reflecting their sector, scale, challenges, and priorities — and is presented in a way that draws a clear line between our past performance and their future need.'}
+        ]},
+      { text:'How well does your organisation use data, metrics, and measurable outcomes to back up its claims?',
+        opts:[
+          {s:1,l:'We make claims about our capability and quality without supporting them with data.'},
+          {s:2,l:'We occasionally reference figures or outcomes but this is inconsistent across the response.'},
+          {s:3,l:'We try to quantify key claims where we have the data available.'},
+          {s:4,l:'We consistently use measurable outcomes — such as performance percentages, cost savings, or delivery timescales — to substantiate the claims we make.'},
+          {s:5,l:'Every significant claim in our response is backed by a specific, verifiable metric or outcome — and we have processes in place to capture this performance data from live contracts so it is always available for future bids.'}
+        ]},
+      { text:'How would you describe the written quality of your bid responses?',
+        opts:[
+          {s:1,l:'Our writing is functional but can be vague, passive, or unconvincing in places.'},
+          {s:2,l:'Quality varies — some contributors write well but others produce weak or unclear content.'},
+          {s:3,l:'We review responses for clarity and try to strengthen language before submission.'},
+          {s:4,l:'Our responses are clearly written, use active voice, and make confident, direct statements backed by evidence.'},
+          {s:5,l:'Our writing is consistently compelling — structured, precise, written in active voice, and free from weak or vague language — with every statement purposefully constructed to build the evaluator\'s confidence in our ability to deliver.'}
+        ]},
+      { text:'How well does your organisation ensure responses are complete, structured, and directly answer what has been asked?',
+        opts:[
+          {s:1,l:'We answer questions in our own way — we don\'t always follow the structure or address every part of the question.'},
+          {s:2,l:'We try to cover the main points but don\'t always check that every element of the question has been addressed.'},
+          {s:3,l:'We review responses before submission to check they answer the question, though this isn\'t always thorough.'},
+          {s:4,l:'We structure responses to follow the order of the question and check compliance against each element before submitting.'},
+          {s:5,l:'Every response is structured to mirror the question exactly — addressing each element in the order it was asked, with a compliance check carried out at draft and final review stages to ensure nothing has been missed or underweighted.'}
+        ]}
+    ]
+  },
+  {
+    id:'T', name:'Test',
+    desc:'Reviewing, challenging, and quality-assuring the bid through structured, independent review stages.',
+    questions:[
+      { text:'How does your organisation review a bid response before submission?',
+        opts:[
+          {s:1,l:'We don\'t have a formal review process — the person who wrote it checks it before it goes.'},
+          {s:2,l:'We ask someone to look over it near the deadline, but this is informal and time is usually short.'},
+          {s:3,l:'We build in a review stage before submission, though the timing and format varies each time.'},
+          {s:4,l:'We have a defined review process with planned stages, named reviewers, and time built into the bid plan from the start.'},
+          {s:5,l:'We operate a structured, multi-stage review process — including technical, strategic, and sign-off reviews — that is planned into the bid programme at the outset, with sufficient time between each stage to implement changes.'}
+        ]},
+      { text:'How does your organisation ensure reviews are carried out by people who weren\'t involved in writing the bid?',
+        opts:[
+          {s:1,l:'Reviews are carried out by the same people who wrote the bid — we don\'t bring in independent reviewers.'},
+          {s:2,l:'We occasionally ask a colleague to look at it, but they are usually close to the bid or briefed informally.'},
+          {s:3,l:'We try to use independent reviewers but this isn\'t always possible due to time or resource constraints.'},
+          {s:4,l:'We deliberately involve reviewers who have not been part of bid development, so they bring a genuinely fresh perspective.'},
+          {s:5,l:'Independent review is a non-negotiable part of our process — reviewers are identified at kick-off, briefed in advance, and kept away from development specifically so they can assess the response critically and objectively.'}
+        ]},
+      { text:'How well does your organisation brief reviewers so they focus on the right things?',
+        opts:[
+          {s:1,l:'We hand the document over and ask for feedback — reviewers decide what to focus on themselves.'},
+          {s:2,l:'We give a brief verbal steer but reviewers largely interpret the brief in their own way.'},
+          {s:3,l:'We provide some guidance on what we\'d like reviewers to focus on, though this isn\'t always structured.'},
+          {s:4,l:'Reviewers are given a clear brief — including the evaluation criteria, win themes, and specific areas to assess — so their feedback is targeted and useful.'},
+          {s:5,l:'Every reviewer receives a structured review brief tied to the original bid plan — including win themes agreed at kick-off, evaluation criteria, and a scoring framework — so feedback is strategic, consistent, and directly actionable.'}
+        ]},
+      { text:'How does your organisation test whether the response will score well through the evaluator\'s eyes?',
+        opts:[
+          {s:1,l:'We don\'t score or formally assess our own response before submitting.'},
+          {s:2,l:'We read through the response and make a judgement on quality, but don\'t assess it against the evaluation criteria.'},
+          {s:3,l:'We check that the response addresses the evaluation criteria before submission.'},
+          {s:4,l:'We conduct a structured strategic review where an independent reviewer scores the response against the evaluation criteria and assesses whether win themes have been delivered.'},
+          {s:5,l:'We carry out a formal evaluator-perspective review at the 95% stage — independently scoring the response against the evaluation criteria, assessing win theme integration, and identifying gaps while there is still sufficient time to address them.'}
+        ]},
+      { text:'How does your organisation manage the final approval and sign-off of a bid before submission?',
+        opts:[
+          {s:1,l:'The bid is submitted by whoever has been working on it — there is no formal sign-off process.'},
+          {s:2,l:'A senior person glances at the final document but isn\'t given enough time or context to review it meaningfully.'},
+          {s:3,l:'We have a sign-off step but it sometimes happens too close to the deadline to allow for meaningful changes.'},
+          {s:4,l:'Senior leadership, finance, and legal review the near-final bid with sufficient time to raise and resolve issues before submission.'},
+          {s:5,l:'We have a defined final approval stage — reached only when the bid is 99% complete — at which point senior leadership, finance, and legal conduct a final check covering risk, compliance, and commercial terms, with clear sign-off authority and enough time to action any final amendments before the deadline.'}
+        ]}
+    ]
+  }
+];
+
+// ─────────────────────────────────────────────
+// SCORING MODEL
+// Score 1-5 per question, 5 questions per discipline
+// Max per discipline: 25  |  Total max: 125
+// Reactive:   25–50   (each disc: 5–10)
+// Structured: 51–75   (each disc: 11–15)
+// Controlled: 76–100  (each disc: 16–20)
+// Strategic:  101–125 (each disc: 21–25)
+// ─────────────────────────────────────────────
+const MATURITY = [
+  { id:'reactive',   label:'Reactive',   min:25,  max:50,
+    desc:'Bidding is largely instinctive, unplanned, and ungoverned. Decisions are reactive, processes are absent or inconsistent, and resource is frequently wasted on low-probability opportunities. The priority is to introduce foundational structures across the QUEST disciplines — starting with Qualify and Engineer — to move from reactive to structured bidding.' },
+  { id:'structured', label:'Structured', min:51,  max:75,
+    desc:'Your organisation has begun to put structure around its bidding activity, but capability is inconsistent across disciplines. Some processes exist but are not applied reliably or across the board. The priority is to formalise and embed the disciplines where you are strongest, and address the gaps holding you back from consistent, controlled bidding.' },
+  { id:'controlled', label:'Controlled', min:76,  max:100,
+    desc:'Your organisation has a solid, consistent bid management foundation across most QUEST disciplines. You are bidding competitively and with clear process. The priority is to sharpen the disciplines where scores are lowest, and look to shift from process compliance to strategic, intelligence-led bidding.' },
+  { id:'strategic',  label:'Strategic',  min:101, max:125,
+    desc:'Your organisation demonstrates strong bid management maturity across the full QUEST framework. Bidding is planned, intelligence-led, and commercially disciplined. The priority is to maintain and continuously improve standards, and to leverage your bid capability as a genuine competitive advantage.' }
+];
+
+const DISC_RECS = {
+  Q:{
+    reactive:  'Your qualification process needs urgent attention. Without a structured bid/no-bid framework, resource is being wasted on low-probability opportunities. Start by defining your absolute no-bid criteria and establishing a simple qualification scorecard.',
+    structured:'Your qualification approach is developing but inconsistently applied. Focus on formalising your bid/no-bid criteria, building a forward pipeline, and ensuring every opportunity is assessed — not just the ones that feel uncertain.',
+    controlled:'Your qualification discipline is solid. Look to strengthen your competitive intelligence at the qualification stage and ensure pipeline planning is genuinely shaping your bid strategy rather than just anticipating it.',
+    strategic: 'Excellent qualification discipline. Ensure your pipeline strategy and no-bid criteria continue to evolve alongside your market position and growth ambitions.'
+  },
+  U:{
+    reactive:  'Understanding is a critical gap. Bidding without deep knowledge of the opportunity, client, and competition significantly reduces win probability. Introduce a formal kick-off process and start building client relationships before tenders are released.',
+    structured:'Your understanding processes are emerging but inconsistent. Prioritise structured kick-off meetings, formal document analysis, and a more disciplined approach to competitive intelligence.',
+    controlled:'Good understanding discipline. Focus on deepening pre-tender client engagement and sharpening your ability to identify incumbent or competitor signals within specifications.',
+    strategic: 'Strong understanding capability. Ensure pre-tender relationship development and competitive intelligence remain active disciplines — not just activities that happen when time allows.'
+  },
+  E:{
+    reactive:  'Engineering is a significant weakness. Bidding without a plan, clear win themes, or defined ownership leads to poor quality and missed opportunities. Introduce a planning phase before writing begins and define win themes at kick-off.',
+    structured:'Your engineering approach is developing. Focus on formalising win theme development, introducing a structured planning phase, and ensuring roles and deadlines are tracked throughout.',
+    controlled:'Good engineering discipline. Look to sharpen win theme quality and ensure tailoring of your offer goes beyond surface-level adjustments to reflect genuine insight into the client\'s specific needs.',
+    strategic: 'Excellent engineering capability. Ensure senior sponsorship remains a consistent feature of your bid process and that offer tailoring continues to be driven by real client intelligence.'
+  },
+  S:{
+    reactive:  'Substantiation is a critical gap. Unsubstantiated claims significantly undermine evaluator confidence. The immediate priority is to start capturing case studies and performance data, and to introduce a basic evidence library.',
+    structured:'Your substantiation is developing but inconsistent. Focus on building and maintaining a structured evidence bank, improving the relevance of case studies to specific opportunities, and introducing quantified outcomes as a standard requirement.',
+    controlled:'Good substantiation discipline. Look to improve the consistency of quantification across all responses and tighten your process for capturing performance data from live contracts.',
+    strategic: 'Excellent substantiation capability. Ensure your evidence bank stays current and that evidence selection remains genuinely tailored to each client and opportunity.'
+  },
+  T:{
+    reactive:  'Testing is absent or insufficient. Without structured review, significant quality and compliance risks are going undetected before submission. Introduce a basic independent review process immediately — even one structured review before submission will improve outcomes.',
+    structured:'Your review process is emerging. Focus on building review stages into the bid plan from the outset, ensuring reviewers are independent, and providing clear briefs so feedback is strategic rather than cosmetic.',
+    controlled:'Good testing discipline. Focus on embedding evaluator-perspective scoring into your strategic review and ensuring senior sign-off happens at the right stage — not too early, not too late.',
+    strategic: 'Excellent testing capability. Ensure your multi-stage review process continues to be planned from kick-off and that strategic review always happens with enough time to act on findings.'
+  }
+};
+
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+let answers = {};
+
+// ─────────────────────────────────────────────
+// MATURITY HELPERS
+// ─────────────────────────────────────────────
+function getMaturity(score) {
+  return MATURITY.find(m => score >= m.min && score <= m.max) || MATURITY[0];
+}
+function getDiscMaturity(raw) {
+  // per discipline max = 25, scale to 125 equivalent
+  const scaled = raw * 5;
+  return getMaturity(scaled);
+}
+
+// ─────────────────────────────────────────────
+// BUILD UI
+// ─────────────────────────────────────────────
+function build() {
+  const c = document.getElementById('disc-container');
+  DISCIPLINES.forEach((d, di) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'disc';
+    wrap.id = `dw-${d.id}`;
+    const qhtml = d.questions.map((q, qi) => `
+      <div class="qblock">
+        <div class="qlabel">${d.id}${qi+1}</div>
+        <div class="qtext">${q.text}</div>
+        <div class="opts" id="opts-${d.id}-${qi}">
+          ${q.opts.map(o => `
+            <button class="opt" onclick="pick('${d.id}',${qi},${o.s},this)">
+              <span class="opt-n">${o.s}</span><span>${o.l}</span>
+            </button>`).join('')}
+        </div>
+      </div>`).join('');
+    wrap.innerHTML = `
+      <div class="disc-head" onclick="toggle('${d.id}')">
+        <div class="disc-icon">${d.id}</div>
+        <div class="disc-meta">
+          <h3>${d.id} — ${d.name}</h3>
+          <p>${d.desc}</p>
+          <div class="disc-prog-lbl">Questions answered</div>
+          <div class="disc-prog-track"><div class="disc-prog-fill" id="dpf-${d.id}"></div></div>
+        </div>
+        <div class="disc-badge" id="db-${d.id}">—</div>
+        <svg class="disc-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="disc-divider"></div>
+      <div class="disc-body">${qhtml}</div>`;
+    c.appendChild(wrap);
+    if (di === 0) toggle(d.id);
+  });
+}
+
+function toggle(id) {
+  document.getElementById(`dw-${id}`).classList.toggle('open');
+}
+
+function pick(dId, qi, score, btn) {
+  answers[`${dId}-${qi}`] = score;
+  document.querySelectorAll(`#opts-${dId}-${qi} .opt`).forEach(b => b.classList.remove('chosen'));
+  btn.classList.add('chosen');
+  refreshDisc(dId);
+  refreshTotal();
+}
+
+function refreshDisc(dId) {
+  const disc = DISCIPLINES.find(d => d.id === dId);
+  let raw = 0, n = 0;
+  disc.questions.forEach((_, qi) => { const v = answers[`${dId}-${qi}`]; if(v){raw+=v;n++;} });
+  const badge = document.getElementById(`db-${dId}`);
+  const fill  = document.getElementById(`dpf-${dId}`);
+  badge.textContent = n ? `${raw}/25` : '—';
+  badge.classList.toggle('live', n > 0);
+  fill.style.width = `${(n / disc.questions.length) * 100}%`;
+}
+
+function refreshTotal() {
+  const total = 25, done = Object.keys(answers).length;
+  document.getElementById('prog-label').textContent = `${done} of ${total} answered`;
+  document.getElementById('prog-fill').style.width = `${(done/total)*100}%`;
+}
+
+// ─────────────────────────────────────────────
+// SUBMIT & EMAIL
+// ─────────────────────────────────────────────
+async function submitAssessment() {
+  // validate contact fields
+  const name    = document.getElementById('f-name').value.trim();
+  const company = document.getElementById('f-company').value.trim();
+  const email   = document.getElementById('f-email').value.trim();
+  if (!name || !company || !email) {
+    showToast('Please enter your name, company, and email address to continue.', true);
+    document.getElementById('f-name').scrollIntoView({behavior:'smooth', block:'center'});
+    return;
+  }
+  const emailRx = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRx.test(email)) {
+    showToast('Please enter a valid email address.', true);
+    return;
+  }
+
+  // check questions
+  const answered = Object.keys(answers).length;
+  if (answered < 25) {
+    if (!confirm(`You have ${25 - answered} unanswered question(s). Continue anyway?`)) return;
+  }
+
+  // calculate scores
+  const scores = DISCIPLINES.map(d => {
+    let raw = 0, n = 0;
+    d.questions.forEach((_, qi) => { const v = answers[`${d.id}-${qi}`]; if(v){raw+=v;n++;} });
+    return { ...d, raw, n };
+  });
+  const totalRaw = scores.reduce((s, d) => s + d.raw, 0);
+  const overall  = getMaturity(totalRaw);
+
+  // build results display
+  showResults(scores, totalRaw, overall, name, company, email);
+
+  // send email via Formspree
+  if (FORMSPREE_ID) {
+    await sendEmail(scores, totalRaw, overall, name, company, email);
+  }
+}
+
+function showResults(scores, totalRaw, overall, name, company, email) {
+  const sector  = document.getElementById('f-sector').value || 'Not specified';
+  const vol     = document.getElementById('f-vol').value    || 'Not specified';
+  const func_   = document.getElementById('f-func').value   || 'Not specified';
+  const dateStr = new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+
+  document.getElementById('res-meta').textContent =
+    `${name} · ${company} · ${dateStr}`;
+
+  // overall maturity
+  document.getElementById('mat-block').innerHTML = `
+    <div class="mat-block ${overall.id}">
+      <div class="mat-lbl">Overall Bid Maturity Rating — QUEST Standard</div>
+      <div class="mat-title">${overall.label}</div>
+      <div class="mat-score">Total Score: ${totalRaw} / 125</div>
+      <div class="mat-desc">${overall.desc}</div>
+    </div>`;
+
+  // per discipline
+  const grid = document.getElementById('disc-grid');
+  grid.innerHTML = '';
+  let lowest = scores[0];
+  scores.forEach(d => {
+    if (d.raw < lowest.raw) lowest = d;
+    const m = getDiscMaturity(d.raw);
+    const rec = DISC_RECS[d.id][m.id];
+    grid.innerHTML += `
+      <div class="drc">
+        <div class="drc-top">
+          <div class="drc-name"><div class="drc-icon">${d.id}</div>${d.name}</div>
+          <div class="drc-right">
+            <div class="rdot ${m.id}"></div>
+            <div class="drc-pct ${m.id}">${d.raw}/25</div>
+          </div>
+        </div>
+        <div class="drc-bar-track">
+          <div class="drc-bar ${m.id}" style="width:${(d.raw/25)*100}%"></div>
+        </div>
+        <div class="drc-rating ${m.id}">${m.label}</div>
+        <div class="drc-rec">${rec}</div>
+      </div>`;
+  });
+
+  // priority note
+  const lowestMat = getDiscMaturity(lowest.raw);
+  document.getElementById('priority-note').innerHTML =
+    `<strong>💡 Priority Focus Area:</strong> Your lowest-scoring discipline is <strong>${lowest.name}</strong> (${lowest.raw}/25 — ${lowestMat.label}). This is your immediate development priority. Contact <strong>BidQuest</strong> at <strong>hello@bidquest.co.uk</strong> to discuss how the QUEST Standard can support your improvement journey.`;
+
+  const sec = document.getElementById('results');
+  sec.style.display = 'block';
+  sec.scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+async function sendEmail(scores, totalRaw, overall, name, company, email) {
+  document.getElementById('sending-overlay').classList.add('show');
+
+  const sector = document.getElementById('f-sector').value || 'Not specified';
+  const vol    = document.getElementById('f-vol').value    || 'Not specified';
+  const func_  = document.getElementById('f-func').value   || 'Not specified';
+
+  const discSummary = scores.map(d => {
+    const m = getDiscMaturity(d.raw);
+    return `${d.id} — ${d.name}: ${d.raw}/25 (${m.label})`;
+  }).join('\n');
+
+  const body = {
+    _subject: `BidQuest QUEST Assessment — ${company} — ${overall.label}`,
+    'Respondent Name':    name,
+    'Company':            company,
+    'Email':              email,
+    'Sector':             sector,
+    'Annual Bid Volume':  vol,
+    'Bid Function':       func_,
+    'Overall Score':      `${totalRaw} / 125`,
+    'Overall Rating':     overall.label,
+    'Discipline Scores':  discSummary,
+    '_replyto':           email
+  };
+
+  try {
+    const res = await fetch(`https://formspree.io/f/${FORMSPREE_ID}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    document.getElementById('sending-overlay').classList.remove('show');
+    if (res.ok) {
+      showToast('✓ Results emailed successfully.');
+    } else {
+      showToast('Results displayed — email could not be sent. Please check your Formspree ID.', true);
+    }
+  } catch(e) {
+    document.getElementById('sending-overlay').classList.remove('show');
+    showToast('Results displayed — email sending failed. Please check your connection.', true);
+  }
+}
+
+function showToast(msg, isError) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (isError ? ' error' : '');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 4500);
+}
+
+function resetTool() {
+  answers = {};
+  document.getElementById('results').style.display = 'none';
+  document.querySelectorAll('.opt').forEach(b => b.classList.remove('chosen'));
+  DISCIPLINES.forEach(d => {
+    document.getElementById(`db-${d.id}`).textContent = '—';
+    document.getElementById(`db-${d.id}`).classList.remove('live');
+    document.getElementById(`dpf-${d.id}`).style.width = '0%';
+    document.getElementById(`dw-${d.id}`).classList.remove('open');
+  });
+  document.getElementById('prog-fill').style.width = '0%';
+  document.getElementById('prog-label').textContent = '0 of 25 answered';
+  document.getElementById('f-name').value = '';
+  document.getElementById('f-company').value = '';
+  document.getElementById('f-email').value = '';
+  toggle('Q');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// Init
+build();
+</script>
+</body>
+</html>
